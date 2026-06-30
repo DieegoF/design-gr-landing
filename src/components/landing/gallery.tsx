@@ -3,32 +3,32 @@ import { useInView } from "@/hooks/use-in-view";
 
 const images = [
   {
-    src: "/images/gallery-1.jpg",
+    src: "/images/gallery-1.jpeg",
     alt: "Placard con puertas corredizas",
     title: "Placard a medida",
   },
   {
-    src: "/images/gallery-2.jpg",
+    src: "/images/gallery-2.jpeg",
     alt: "Interior de vestidor con cajonera",
     title: "Vestidor con cajonera",
   },
   {
-    src: "/images/gallery-3.jpg",
+    src: "/images/gallery-3.jpeg",
     alt: "Biblioteca y estantería en madera",
     title: "Biblioteca / Estantería",
   },
   {
-    src: "/images/gallery-4.jpg",
+    src: "/images/gallery-4.jpeg",
     alt: "Revestimiento decorativo en listones de madera",
     title: "Revestimiento en listones",
   },
   {
-    src: "/images/gallery-5.jpg",
+    src: "/images/gallery-5.jpeg",
     alt: "Diseño integral de mobiliario comercial",
     title: "Diseño integral de local",
   },
   {
-    src: "/images/gallery-6.jpg",
+    src: "/images/gallery-6.jpeg",
     alt: "Mobiliario comercial a medida",
     title: "Mobiliario comercial",
   },

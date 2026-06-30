@@ -46,7 +46,7 @@ export function Hero() {
           >
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted">
               <img
-                src="/images/hero.jpg"
+                src="/images/hero.jpeg"
                 alt="Mueble TV con panel de listones en madera"
                 width={1200}
                 height={800}

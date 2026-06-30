@@ -16,7 +16,7 @@ export function About() {
             )}
           >
             <img
-              src="/images/about.jpg"
+              src="/images/about.jpeg"
               alt="Mostrador y mobiliario comercial con panel de listones"
               width={1200}
               height={800}
