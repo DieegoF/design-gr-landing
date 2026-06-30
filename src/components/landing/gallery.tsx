@@ -3,34 +3,34 @@ import { useInView } from "@/hooks/use-in-view";
 
 const images = [
   {
-    src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop",
-    alt: "Cocina moderna a medida",
-    title: "Cocina integral",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=600&fit=crop",
-    alt: "Placard con interior organizado",
+    src: "/images/gallery-1.jpg",
+    alt: "Placard con puertas corredizas",
     title: "Placard a medida",
   },
   {
-    src: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&h=600&fit=crop",
-    alt: "Escritorio de madera",
-    title: "Escritorio de diseño",
+    src: "/images/gallery-2.jpg",
+    alt: "Interior de vestidor con cajonera",
+    title: "Vestidor con cajonera",
   },
   {
-    src: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&h=600&fit=crop",
-    alt: "Mueble de baño",
-    title: "Mueble de baño",
+    src: "/images/gallery-3.jpg",
+    alt: "Biblioteca y estantería en madera",
+    title: "Biblioteca / Estantería",
   },
   {
-    src: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop",
-    alt: "Mueble de living",
-    title: "Mueble TV / Living",
+    src: "/images/gallery-4.jpg",
+    alt: "Revestimiento decorativo en listones de madera",
+    title: "Revestimiento en listones",
   },
   {
-    src: "https://images.unsplash.com/photo-1541123603104-512919d6a96c?w=800&h=600&fit=crop",
-    alt: "Detalle de carpintería en madera",
-    title: "Detalle de acabado",
+    src: "/images/gallery-5.jpg",
+    alt: "Diseño integral de mobiliario comercial",
+    title: "Diseño integral de local",
+  },
+  {
+    src: "/images/gallery-6.jpg",
+    alt: "Mobiliario comercial a medida",
+    title: "Mobiliario comercial",
   },
 ];
 

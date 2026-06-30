@@ -16,8 +16,8 @@ export function About() {
             )}
           >
             <img
-              src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&h=800&fit=crop"
-              alt="Taller de carpintería trabajando la madera"
+              src="/images/about.jpg"
+              alt="Mostrador y mobiliario comercial con panel de listones"
               width={1200}
               height={800}
               className="size-full object-cover"

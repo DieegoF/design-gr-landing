@@ -46,8 +46,8 @@ export function Hero() {
           >
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted">
               <img
-                src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=800&fit=crop"
-                alt="Cocina moderna a medida en madera"
+                src="/images/hero.jpg"
+                alt="Mueble TV con panel de listones en madera"
                 width={1200}
                 height={800}
                 className="size-full object-cover"
