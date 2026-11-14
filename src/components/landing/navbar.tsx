@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { scrollToSection } from "@/lib/scroll";
 
 const navLinks = [
-  { label: "Servicios", id: "servicios" },
-  { label: "Galería", id: "galeria" },
+  { label: "Armalo en 3D", id: "armalo" },
+  { label: "Trabajos", id: "galeria" },
+  { label: "Presupuesto", id: "presupuesto" },
   { label: "Nosotros", id: "nosotros" },
-  { label: "Contacto", id: "contacto" },
 ];
 
 export function Navbar() {
@@ -42,10 +42,8 @@ export function Navbar() {
               {link.label}
             </button>
           ))}
-          <Button asChild size="sm">
-            <a href="https://wa.me/541164321329" target="_blank" rel="noopener noreferrer">
-              Pedí tu presupuesto
-            </a>
+          <Button size="sm" onClick={() => handleNav("presupuesto")}>
+            Pedí tu presupuesto
           </Button>
         </nav>
 
@@ -70,10 +68,8 @@ export function Navbar() {
                 {link.label}
               </button>
             ))}
-            <Button asChild className="w-full">
-              <a href="https://wa.me/541164321329" target="_blank" rel="noopener noreferrer">
-                Pedí tu presupuesto
-              </a>
+            <Button className="w-full" onClick={() => handleNav("presupuesto")}>
+              Pedí tu presupuesto
             </Button>
           </nav>
         </div>

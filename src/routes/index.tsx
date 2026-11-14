@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   Navbar,
   Hero,
-  Services,
+  Configurator,
   Gallery,
+  Quote,
   About,
-  Testimonials,
-  Contact,
   Footer,
   FloatingWhatsApp,
+  QuoteProvider,
 } from "@/components/landing";
 
 export const Route = createFileRoute("/")({
@@ -27,18 +27,19 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main>
-        <Hero />
-        <Services />
-        <Gallery />
-        <About />
-        <Testimonials />
-        <Contact />
-      </main>
-      <Footer />
-      <FloatingWhatsApp />
-    </div>
+    <QuoteProvider>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main>
+          <Hero />
+          <Configurator />
+          <Gallery />
+          <Quote />
+          <About />
+        </main>
+        <Footer />
+        <FloatingWhatsApp />
+      </div>
+    </QuoteProvider>
   );
 }

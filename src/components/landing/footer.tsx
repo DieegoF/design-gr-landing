@@ -2,10 +2,10 @@ import { Instagram, Phone } from "lucide-react";
 import { scrollToSection } from "@/lib/scroll";
 
 const footerLinks = [
-  { label: "Servicios", id: "servicios" },
-  { label: "Galería", id: "galeria" },
+  { label: "Armalo en 3D", id: "armalo" },
+  { label: "Trabajos", id: "galeria" },
+  { label: "Presupuesto", id: "presupuesto" },
   { label: "Nosotros", id: "nosotros" },
-  { label: "Contacto", id: "contacto" },
 ];
 
 export function Footer() {

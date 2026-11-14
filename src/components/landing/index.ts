@@ -7,3 +7,6 @@ export { Testimonials } from "./testimonials";
 export { Contact } from "./contact";
 export { Footer } from "./footer";
 export { FloatingWhatsApp } from "./floating-whatsapp";
+export { Configurator } from "./configurator";
+export { Quote } from "./quote";
+export { QuoteProvider } from "./quote-context";
