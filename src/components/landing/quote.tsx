@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type MouseEvent } from "react";
 import { Camera, Download, Instagram, MapPin, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,27 @@ import { TIPOS, WHATSAPP, armarMensaje, medidasTexto, useQuote } from "./quote-c
 const MATERIALES = ["Melamina", "Laqueado", "Madera maciza", "No sé, que me asesoren"];
 const ZONAS = ["La Plata", "CABA", "AMBA (otra zona)"];
 const PLAZOS = ["Lo antes posible", "En 1–2 meses", "Estoy averiguando"];
+
+/** dataURL → File de forma síncrona: navigator.share tiene que llamarse dentro del gesto del usuario (Safari corta si hay awaits antes). */
+function dataUrlToFile(dataUrl: string, name: string): File {
+  const [head, b64] = dataUrl.split(",");
+  const type = /data:(.*?);/.exec(head)?.[1] || "image/jpeg";
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new File([bytes], name, { type });
+}
+
+/** Solo en celulares: ahí el menú de compartir lleva imagen + texto juntos a WhatsApp. */
+function puedeCompartir(files: File[]) {
+  if (!files.length || typeof navigator === "undefined" || typeof window === "undefined") return false;
+  if (!window.matchMedia?.("(pointer: coarse)").matches) return false;
+  try {
+    return !!navigator.canShare?.({ files, text: "x" });
+  } catch {
+    return false;
+  }
+}
 
 function Chips({ value, options, onChange }: { value: string; options: readonly string[]; onChange: (v: string) => void }) {
   return (
@@ -32,11 +53,32 @@ function Chips({ value, options, onChange }: { value: string; options: readonly 
 export function Quote() {
   const { q, update } = useQuote();
   const [thumbs, setThumbs] = useState<string[]>([]);
-  const msg = useMemo(() => armarMensaje(q), [q]);
+  const [fotos, setFotos] = useState<File[]>([]);
+  const archivos = useMemo(
+    () => [...(q.img ? [dataUrlToFile(q.img, "diseno-3d-design-gr.jpg")] : []), ...fotos],
+    [q.img, fotos],
+  );
+  const adjunta = useMemo(() => puedeCompartir(archivos), [archivos]);
+  const msg = useMemo(() => armarMensaje(q, adjunta), [q, adjunta]);
   const done = [!!q.tipo, !!medidasTexto(q), !!q.material, !!(q.zona && q.plazo), !!q.nombre.trim()];
   const n = done.filter(Boolean).length;
   const ok = !!q.tipo && !!q.nombre.trim();
-  const waUrl = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
+  // El link wa.me solo lleva texto: ahí la imagen va "acá abajo", aparte.
+  const waUrl = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(armarMensaje(q))}`;
+
+  const enviar = async (e: MouseEvent<HTMLAnchorElement>) => {
+    if (!ok) return e.preventDefault();
+    if (!adjunta) return; // escritorio / sin archivos: sigue el link wa.me con el texto
+    e.preventDefault();
+    // Respaldo: algunas versiones de WhatsApp en iPhone descartan el texto al compartir imágenes.
+    navigator.clipboard?.writeText(msg).catch(() => {});
+    try {
+      await navigator.share({ files: archivos, text: msg });
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return; // canceló el menú
+      window.open(waUrl, "_blank", "noopener,noreferrer");
+    }
+  };
 
   const compartirImagen = async () => {
     if (!q.img) return;
@@ -131,7 +173,9 @@ export function Quote() {
                 <Camera className="size-7 flex-none text-accent" strokeWidth={1.6} />
                 <span className="text-sm text-foreground">
                   Elegí una foto de la pared o el ambiente
-                  <small className="block text-xs text-muted-foreground">La mandás en el chat de WhatsApp después del mensaje</small>
+                  <small className="block text-xs text-muted-foreground">
+                    {adjunta || !thumbs.length ? "Se envía junto con tu mensaje" : "La mandás en el chat de WhatsApp después del mensaje"}
+                  </small>
                 </span>
                 <input
                   type="file"
@@ -141,6 +185,7 @@ export function Quote() {
                   onChange={(e) => {
                     const fs = [...(e.target.files || [])];
                     setThumbs(fs.slice(0, 4).map((f) => URL.createObjectURL(f)));
+                    setFotos(fs.slice(0, 9));
                     update({ fotos: fs.length });
                   }}
                 />
@@ -180,7 +225,7 @@ export function Quote() {
               target="_blank"
               rel="noopener noreferrer"
               aria-disabled={!ok}
-              onClick={(e) => !ok && e.preventDefault()}
+              onClick={enviar}
               className={cn(
                 "mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-4 text-base font-bold",
                 ok ? "bg-whatsapp text-[#073b1c]" : "cursor-not-allowed bg-muted text-muted-foreground",
@@ -188,7 +233,15 @@ export function Quote() {
             >
               <MessageCircle className="size-5 fill-current" /> Enviar por WhatsApp
             </a>
-            {q.img && (
+            {adjunta && ok && (
+              <p className="mt-2 text-center text-xs text-muted-foreground">
+                Elegí WhatsApp y el chat de Design.gr (11-6432-1329).{" "}
+                <a href={waUrl} target="_blank" rel="noopener noreferrer" className="underline">
+                  ¿No lo encontrás? Enviá solo el texto
+                </a>
+              </p>
+            )}
+            {q.img && !adjunta && (
               <button type="button" onClick={compartirImagen} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground">
                 <Download className="size-4" /> Guardar o compartir la imagen del 3D
               </button>
