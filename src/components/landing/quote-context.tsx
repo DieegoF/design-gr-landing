@@ -103,7 +103,8 @@ export function medidasTexto(q: QuoteState) {
     .join(", ");
 }
 
-export function armarMensaje(q: QuoteState) {
+/** `adjunto`: la imagen viaja en el mismo envío (compartir nativo), no "acá abajo". */
+export function armarMensaje(q: QuoteState, adjunto = false) {
   const L: string[] = [];
   L.push(`Hola Design.gr! Soy ${q.nombre.trim() || "…"}. Quiero presupuesto para:`);
   L.push(`• Mueble: ${q.tipo || "…"}`);
@@ -117,7 +118,7 @@ export function armarMensaje(q: QuoteState) {
   if (q.detalle.trim()) L.push(`• Detalle: ${q.detalle.trim()}`);
   if (q.config || q.fotos) {
     const parts = [q.config ? "la imagen del diseño 3D" : "", q.fotos ? (q.fotos > 1 ? "las fotos del espacio" : "la foto del espacio") : ""].filter(Boolean);
-    L.push(`Te mando ${parts.join(" y ")} acá abajo.`);
+    L.push(adjunto ? `Te adjunto ${parts.join(" y ")}.` : `Te mando ${parts.join(" y ")} acá abajo.`);
   }
   return L.join("\n");
 }
