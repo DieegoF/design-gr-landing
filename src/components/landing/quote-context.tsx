@@ -121,8 +121,8 @@ export function armarMensaje(q: QuoteState, link = "", fotosRef: string[] = [], 
   const otro = q.tipo === OTRO;
   L.push(
     otro
-      ? `Hola Design.gr! Soy ${q.nombre.trim() || "…"}. Quiero consultar por un mueble que no está en la lista:`
-      : `Hola Design.gr! Soy ${q.nombre.trim() || "…"}. Quiero presupuesto para:`,
+      ? `Hola Design.gr! Soy ${q.nombre.trim() || "(tu nombre)"}. Quiero consultar por un mueble que no está en la lista:`
+      : `Hola Design.gr! Soy ${q.nombre.trim() || "(tu nombre)"}. Quiero presupuesto para:`,
   );
   if (otro) {
     L.push(`• Lo que necesito: ${q.consulta.trim() || "…"}`);

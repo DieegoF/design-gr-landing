@@ -457,7 +457,7 @@ export function Quote() {
                   className="mb-2 ml-auto block w-3/4 rounded-xl border-4 border-[#dcf8c6]"
                 />
               )}
-              <div className="ml-5 min-h-16 whitespace-pre-wrap rounded-2xl rounded-br-sm bg-[#dcf8c6] px-3 py-2.5 text-[13.5px] text-[#16130F] shadow-sm">
+              <div className="ml-5 min-h-16 whitespace-pre-wrap [overflow-wrap:anywhere] rounded-2xl rounded-br-sm bg-[#dcf8c6] px-3 py-2.5 text-[13.5px] text-[#16130F] shadow-sm">
                 {msg}
               </div>
             </div>
