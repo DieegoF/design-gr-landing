@@ -39,7 +39,9 @@ export const Route = createFileRoute("/api/diseno")({
           return json({ error: "no es un JPEG" }, 415);
         }
 
-        const id = nuevoId();
+        // ?tipo=foto → foto de referencia que sube el cliente (id con prefijo "f-")
+        const esFoto = new URL(request.url).searchParams.get("tipo") === "foto";
+        const id = (esFoto ? "f-" : "") + nuevoId();
         try {
           await put(`d/${id}.jpg`, new Blob([bytes], { type: "image/jpeg" }), {
             access: "private",

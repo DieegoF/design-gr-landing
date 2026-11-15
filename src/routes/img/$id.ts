@@ -8,7 +8,8 @@ export const Route = createFileRoute("/img/$id")({
     handlers: {
       GET: async ({ params }) => {
         const id = params.id.replace(/\.jpg$/, "");
-        if (!/^[a-z0-9]{6,16}$/.test(id)) return new Response("No encontrado", { status: 404 });
+        if (!/^(f-)?[a-z0-9]{6,16}$/.test(id))
+          return new Response("No encontrado", { status: 404 });
         try {
           const r = await get(`d/${id}.jpg`, { access: "private" });
           if (!r || r.statusCode !== 200) return new Response("No encontrado", { status: 404 });

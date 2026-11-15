@@ -112,8 +112,11 @@ export function medidasTexto(q: QuoteState) {
     .join(", ");
 }
 
-/** `link`: página con la imagen del 3D (WhatsApp muestra su miniatura en el chat). */
-export function armarMensaje(q: QuoteState, link = "") {
+/**
+ * `link`: página con la imagen del 3D (WhatsApp muestra su miniatura en el chat).
+ * `fotosRef`: links de las fotos de referencia ("Otro mueble"); `refAparte` cuenta las que no se pudieron subir.
+ */
+export function armarMensaje(q: QuoteState, link = "", fotosRef: string[] = [], refAparte = 0) {
   const L: string[] = [];
   const otro = q.tipo === OTRO;
   L.push(
@@ -121,8 +124,12 @@ export function armarMensaje(q: QuoteState, link = "") {
       ? `Hola Design.gr! Soy ${q.nombre.trim() || "…"}. Quiero consultar por un mueble que no está en la lista:`
       : `Hola Design.gr! Soy ${q.nombre.trim() || "…"}. Quiero presupuesto para:`,
   );
-  if (otro) L.push(`• Lo que necesito: ${q.consulta.trim() || "…"}`);
-  else L.push(`• Mueble: ${q.tipo || "…"}`);
+  if (otro) {
+    L.push(`• Lo que necesito: ${q.consulta.trim() || "…"}`);
+    fotosRef.forEach((f, i) =>
+      L.push(`• Foto de referencia${fotosRef.length > 1 ? ` ${i + 1}` : ""}: ${f}`),
+    );
+  } else L.push(`• Mueble: ${q.tipo || "…"}`);
   if (q.ref) L.push(`• Me gusta este trabajo: "${q.ref}"`);
   if (q.config) L.push(`• Lo armé en el 3D: ${q.config}`);
   if (link) L.push(`• Mi diseño 3D: ${link}`);
@@ -133,8 +140,14 @@ export function armarMensaje(q: QuoteState, link = "") {
   if (q.plazo) L.push(`• Para cuándo: ${q.plazo}`);
   if (q.detalle.trim()) L.push(`• Detalle: ${q.detalle.trim()}`);
   const imgAparte = !!q.config && !link;
-  if (imgAparte || q.fotos) {
-    const parts = [imgAparte ? "la imagen del diseño 3D" : "", q.fotos ? (q.fotos > 1 ? "las fotos del espacio" : "la foto del espacio") : ""].filter(Boolean);
+  const refFalta = otro ? refAparte : 0;
+  const fotosEsp = otro ? 0 : q.fotos; // en "Otro mueble" las fotos van como referencia
+  if (imgAparte || fotosEsp || refFalta) {
+    const parts = [
+      imgAparte ? "la imagen del diseño 3D" : "",
+      refFalta ? (refFalta > 1 ? "las fotos de referencia" : "la foto de referencia") : "",
+      fotosEsp ? (fotosEsp > 1 ? "las fotos del espacio" : "la foto del espacio") : "",
+    ].filter(Boolean);
     L.push(`Te mando ${parts.join(" y ")} acá abajo.`);
   }
   return L.join("\n");
