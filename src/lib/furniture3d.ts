@@ -23,14 +23,14 @@ export const TYPES: Record<FurnitureKind, TypeDef> = {
   escritorio: {
     lab: "Escritorio",
     tipo: "Escritorio",
-    W: [90, 240, 140],
+    W: [90, 200, 130],
     H: [70, 80, 75],
-    D: [45, 80, 60],
-    n: [0, 4, 3],
+    D: [45, 70, 50],
+    n: [2, 5, 4],
     nl: "Cajones",
     hl: "Alto de la tapa",
-    e: [0, 4, 1],
-    el: "Repisas sobre el escritorio",
+    e: [0, 3, 1],
+    el: "Estantes de la columna",
   },
   placard: {
     lab: "Placard / vestidor",
@@ -127,6 +127,65 @@ export interface FurnitureState {
   /** Cantidad de estantes / repisas. */
   e: number;
   m: string;
+  // ---- solo escritorio ----
+  /** Qué va de cada lado bajo la tapa. */
+  izq?: LadoEscritorio;
+  der?: LadoEscritorio;
+  /** Material de la tapa ("" = igual al cuerpo). */
+  mt?: string;
+  /** Repisas en la pared sobre el escritorio. */
+  r?: number;
+}
+
+export type LadoEscritorio = "cajonera" | "estantes" | "pata";
+
+export const LADOS: Record<LadoEscritorio, string> = {
+  cajonera: "Cajonera",
+  estantes: "Columna con estantes",
+  pata: "Pata lateral",
+};
+
+/** Ancho de cada módulo (cajonera o columna) en cm. */
+export const MODULO_CM = 35;
+/** Espacio libre mínimo para las piernas en cm. */
+export const LIBRE_MIN_CM = 60;
+
+/** Modelo más pedido: cajonera de 4 a la izquierda y columna con 1 estante a la derecha, todo blanco. */
+export const ESCRITORIO_DEF: Partial<FurnitureState> = {
+  W: 130,
+  H: 75,
+  D: 50,
+  n: 4,
+  e: 1,
+  m: "Melamina blanca",
+  izq: "cajonera",
+  der: "estantes",
+  mt: "",
+  r: 0,
+};
+
+const anchoLado = (l: LadoEscritorio | undefined) =>
+  l === "pata" || !l ? ESPESOR_MM / 10 : MODULO_CM;
+
+/** Centímetros libres entre los dos lados del escritorio. */
+export function libreEscritorio(W: number, izq?: LadoEscritorio, der?: LadoEscritorio) {
+  return Math.round(W - anchoLado(izq) - anchoLado(der));
+}
+
+/** ¿Este lado entra sin dejar menos de LIBRE_MIN_CM para las piernas? */
+export function ladoEntra(st: FurnitureState, lado: "izq" | "der", v: LadoEscritorio) {
+  const izq = lado === "izq" ? v : st.izq,
+    der = lado === "der" ? v : st.der;
+  return libreEscritorio(st.W, izq, der) >= LIBRE_MIN_CM;
+}
+
+/** Si el ancho no alcanza, cambia módulos por patas (primero la derecha). */
+export function ajustarEscritorio(st: FurnitureState): FurnitureState {
+  if (st.k !== "escritorio") return st;
+  const s = { ...st };
+  if (libreEscritorio(s.W, s.izq, s.der) < LIBRE_MIN_CM && s.der !== "pata") s.der = "pata";
+  if (libreEscritorio(s.W, s.izq, s.der) < LIBRE_MIN_CM && s.izq !== "pata") s.izq = "pata";
+  return s;
 }
 
 function woodTex(a: string, b: string, seed: number) {
@@ -186,7 +245,7 @@ export class FurnitureScene {
   private clock = new THREE.Clock();
   private drag: { x: number; y: number; yaw: number; pitch: number } | null = null;
 
-  st: FurnitureState = { k: "escritorio", W: 140, H: 75, D: 60, n: 3, e: 1, m: "Melamina roble" };
+  st: FurnitureState = { k: "escritorio", ...ESCRITORIO_DEF } as FurnitureState;
   open = 0;
   openT = 0;
   person = false;
@@ -332,7 +391,15 @@ export class FurnitureScene {
 
   setType(k: FurnitureKind) {
     const t = TYPES[k];
-    this.set({ k, W: t.W[2], H: t.H[2], D: t.D[2], n: t.n[2], e: t.e[2] });
+    this.set({
+      k,
+      W: t.W[2],
+      H: t.H[2],
+      D: t.D[2],
+      n: t.n[2],
+      e: t.e[2],
+      ...(k === "escritorio" ? ESCRITORIO_DEF : {}),
+    });
   }
 
   toggleOpen() {
@@ -441,50 +508,73 @@ export class FurnitureScene {
 
   private escritorio(W: number, H: number, D: number, n: number, m: THREE.Material, e: number) {
     const T = ESPESOR_MM / 1000,
-      TT = T,
       M = this.M,
-      legH = H - TT,
-      pw = n > 0 ? Math.min(0.42, W * 0.35) : 0;
-    // tapa
-    this.box(W, TT, D, 0, H - TT / 2, D / 2, m);
-    // lateral izquierdo (panel)
-    this.box(TT, legH, D - 0.02, -W / 2 + TT / 2, legH / 2, D / 2, m);
-    if (n > 0) {
-      // cajonera a la derecha
-      const x0 = W / 2 - pw,
-        xc = x0 + pw / 2,
-        pl = 0.06,
-        ih = legH - pl;
-      this.box(T, legH, D - 0.02, x0 + T / 2, legH / 2, D / 2, m);
-      this.box(T, legH, D - 0.02, W / 2 - T / 2, legH / 2, D / 2, m);
-      this.box(pw - 2 * T, pl, T, xc, pl / 2, D - 0.05, M.BACK);
-      this.box(pw - 2 * T, T, D - 0.02, xc, pl + T / 2, D / 2, m);
-      this.box(pw - 2 * T, ih, 0.006, xc, pl + ih / 2, 0.012, M.BACK);
-      const dh = ih / n;
-      for (let k = 0; k < n; k++)
-        this.drawer(
-          xc,
-          pl + dh * k + dh / 2,
-          pw - 2 * T - 0.004,
-          dh - 0.006,
-          D - 0.022,
-          D - 0.1,
-          m,
-        );
-    } else {
-      this.box(TT, legH, D - 0.02, W / 2 - TT / 2, legH / 2, D / 2, m);
-    }
-    // faldón trasero
-    const fx0 = -W / 2 + TT,
-      fx1 = n > 0 ? W / 2 - pw : W / 2 - TT;
-    this.box(fx1 - fx0, 0.32, T, (fx0 + fx1) / 2, legH - 0.16, 0.1, m);
-    // repisas flotantes (e)
-    const sw = Math.min(W * 0.7, 1.2),
+      st = this.st,
+      mt = (st.mt && this.mats[st.mt]) || m,
+      legH = H - T,
+      mw = MODULO_CM / 100,
+      izq = st.izq ?? "cajonera",
+      der = st.der ?? "estantes";
+    // tapa (puede ir en otro color)
+    this.box(W, T, D, 0, H - T / 2, D / 2, mt);
+
+    const BOOKC = ["#8a3b2e", "#2f4a3a", "#c9a35a", "#3f5872", "#d8cfc0"];
+    const lado = (kind: LadoEscritorio, sgn: -1 | 1) => {
+      // sgn -1 = izquierda, 1 = derecha; x0/x1 = borde exterior / interior del módulo
+      if (kind === "pata") {
+        this.box(T, legH, D - 0.02, sgn * (W / 2 - T / 2), legH / 2, D / 2, m);
+        return sgn * (W / 2 - T);
+      }
+      const xo = sgn * (W / 2),
+        xi = sgn * (W / 2 - mw),
+        xc = (xo + xi) / 2,
+        iw = mw - 2 * T,
+        pl = 0.04,
+        ih = legH - pl - T;
+      this.box(T, legH, D - 0.02, xo - sgn * (T / 2), legH / 2, D / 2, m);
+      this.box(T, legH, D - 0.02, xi + sgn * (T / 2), legH / 2, D / 2, m);
+      this.box(iw, pl, T, xc, pl / 2, D - 0.04, m);
+      this.box(iw, T, D - 0.02, xc, pl + T / 2, D / 2, m);
+      this.box(iw, ih, 0.006, xc, pl + T + ih / 2, 0.012, M.BACK);
+      if (kind === "cajonera") {
+        const dh = ih / n;
+        for (let k = 0; k < n; k++)
+          this.drawer(xc, pl + T + dh * k + dh / 2, iw - 0.004, dh - 0.006, D - 0.022, D - 0.1, m);
+      } else {
+        const hs = ih / (e + 1);
+        for (let k = 1; k <= e; k++) this.box(iw, T, D - 0.03, xc, pl + T + k * hs, D / 2, m);
+        // unos libros en el hueco de arriba
+        let bx = xc - iw / 2 + 0.02;
+        const yb = pl + T + e * hs + T / 2,
+          bhMax = Math.max(0.08, hs - 0.04);
+        BOOKC.forEach((c, i) => {
+          const bw = 0.025 + (i % 2) * 0.01,
+            bh = Math.min(bhMax, 0.18 + (i % 3) * 0.02);
+          if (bx + bw > xc + iw / 2 - 0.02) return;
+          this.box(
+            bw,
+            bh,
+            D * 0.6,
+            bx + bw / 2,
+            yb + bh / 2,
+            D * 0.5,
+            std({ color: c, roughness: 0.7 }),
+          );
+          bx += bw + 0.003;
+        });
+      }
+      return xi;
+    };
+    const xL = lado(izq, -1),
+      xR = lado(der, 1);
+
+    // repisas en la pared (r)
+    const r = st.r ?? 0,
+      sw = Math.min(W * 0.7, 1.2),
       sx = -W / 2 + sw / 2 + 0.05;
-    for (let k = 0; k < e; k++) {
+    for (let k = 0; k < r; k++) {
       const sy = H + 0.62 + k * 0.36;
       this.box(sw, T, 0.24, sx, sy, 0.12, m);
-      const BOOKC = ["#8a3b2e", "#2f4a3a", "#c9a35a", "#3f5872", "#d8cfc0"];
       let bx = -W / 2 + 0.12 + (k % 2) * sw * 0.45;
       BOOKC.slice(0, 5 - (k % 3)).forEach((c, i) => {
         const bw = 0.03 + (i % 2) * 0.012,
@@ -500,19 +590,18 @@ export class FurnitureScene {
         );
         bx += bw + 0.004;
       });
-      if (k % 2 === 0)
-        this.box(0.12, 0.12, 0.12, -W / 2 + sw - 0.1, sy + T / 2 + 0.06, 0.12, this.M.CER);
     }
-    // monitor + teclado
-    const mx = n > 0 ? -pw / 2 : 0,
-      top = H,
-      mw = Math.min(0.6, W * 0.4),
-      mh = mw * 0.5625;
-    this.box(0.2, 0.012, 0.16, mx, top + 0.006, 0.16, M.HANDLE);
-    this.box(0.04, 0.16, 0.025, mx, top + 0.09, 0.15, M.HANDLE);
-    this.box(mw, mh, 0.025, mx, top + 0.17 + mh / 2, 0.16, M.TV);
-    this.box(mw - 0.016, mh - 0.016, 0.002, mx, top + 0.17 + mh / 2, 0.1735, M.SCREEN);
-    this.box(0.42, 0.018, 0.13, mx, top + 0.009, Math.min(D - 0.1, 0.4), M.HANDLE);
+
+    // notebook en el centro del hueco libre
+    const cx = (xL + xR) / 2,
+      top = H;
+    this.box(0.34, 0.012, 0.24, cx, top + 0.006, Math.min(D * 0.55, 0.3), M.STEEL);
+    const scr = new THREE.Group();
+    scr.position.set(cx, top + 0.012, Math.min(D * 0.55, 0.3) - 0.12);
+    scr.rotation.x = -0.25;
+    this.G.add(scr);
+    this.box(0.34, 0.22, 0.008, 0, 0.11, 0, M.STEEL, scr);
+    this.box(0.32, 0.2, 0.002, 0, 0.11, 0.005, M.SCREEN, scr);
   }
 
   private placard(W: number, H: number, D: number, n: number, m: THREE.Material, e: number) {

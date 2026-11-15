@@ -8,6 +8,7 @@ import type {
   FurnitureKind,
   FurnitureScene,
   FurnitureState,
+  LadoEscritorio,
   TypeDef,
   MaterialDef,
 } from "@/lib/furniture3d";
@@ -24,12 +25,16 @@ export function Configurator() {
   const [lib, setLib] = useState<Lib | null>(null);
   const [st, setSt] = useState<FurnitureState>({
     k: "escritorio",
-    W: 140,
+    W: 130,
     H: 75,
-    D: 60,
-    n: 3,
+    D: 50,
+    n: 4,
     e: 1,
-    m: "Melamina roble",
+    m: "Melamina blanca",
+    izq: "cajonera",
+    der: "estantes",
+    mt: "",
+    r: 0,
   });
   const [open, setOpen] = useState(false);
   const [person, setPerson] = useState(false);
@@ -68,7 +73,8 @@ export function Configurator() {
 
   const apply = (p: Partial<FurnitureState>) => {
     setSt((s) => {
-      const n = { ...s, ...p };
+      let n = { ...s, ...p };
+      if (lib) n = lib.ajustarEscritorio(n); // si no entran los módulos, pasa a pata
       sceneRef.current?.set(n);
       return n;
     });
@@ -77,7 +83,16 @@ export function Configurator() {
   const setKind = (k: FurnitureKind, preset?: Partial<FurnitureState>) => {
     if (!lib) return;
     const t = lib.TYPES[k];
-    apply({ k, W: t.W[2], H: t.H[2], D: t.D[2], n: t.n[2], e: t.e[2], ...preset });
+    apply({
+      k,
+      W: t.W[2],
+      H: t.H[2],
+      D: t.D[2],
+      n: t.n[2],
+      e: t.e[2],
+      ...(k === "escritorio" ? lib.ESCRITORIO_DEF : {}),
+      ...preset,
+    });
   };
 
   // pedidos desde el hero o la galería
@@ -92,12 +107,9 @@ export function Configurator() {
     update({
       tipo: t.tipo,
       material: lib.MATERIALS[st.m].grp,
-      config: [
-        `${t.lab.toLowerCase()} de ${st.W}×${st.H}×${st.D} cm`,
-        st.n ? `${st.n} ${t.nl.toLowerCase()}` : `sin ${t.nl.toLowerCase()}`,
-        st.e ? `${st.e} ${st.e === 1 ? "estante" : "estantes"}` : "sin estantes",
-        `${st.m.toLowerCase()}${lib.MATERIALS[st.m].grp === "Melamina" ? ` ${lib.ESPESOR_MM} mm` : ""}`,
-      ].join(", "),
+      config: (st.k === "escritorio" ? configEscritorio(lib, st) : configGeneral(lib, st, t)).join(
+        ", ",
+      ),
       an: String(st.W),
       al: String(st.H),
       pr: String(st.D),
@@ -257,7 +269,7 @@ export function Configurator() {
                 </label>
               ))}
 
-            {T && (
+            {T && st.k !== "escritorio" && (
               <div className="mb-4 grid grid-cols-2 gap-3">
                 <Contador
                   label={T.nl}
@@ -276,8 +288,75 @@ export function Configurator() {
               </div>
             )}
 
+            {T && lib && st.k === "escritorio" && (
+              <div className="mb-4">
+                {(["izq", "der"] as const).map((lado) => (
+                  <div key={lado} className="mb-3">
+                    <span className="mb-1.5 block text-sm font-semibold text-foreground">
+                      {lado === "izq" ? "Lado izquierdo" : "Lado derecho"}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(Object.keys(lib.LADOS) as LadoEscritorio[]).map((v) => {
+                        const entra = st[lado] === v || lib.ladoEntra(st, lado, v);
+                        return (
+                          <button
+                            key={v}
+                            type="button"
+                            disabled={!entra}
+                            title={entra ? undefined : `Con ${st.W} cm de ancho no entra`}
+                            onClick={() => apply({ [lado]: v })}
+                            className={cn(
+                              "rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                              st[lado] === v
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-background text-foreground",
+                            )}
+                          >
+                            {lib.LADOS[v]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+                <p className="mb-3 rounded-lg bg-secondary px-3 py-2 text-xs text-muted-foreground">
+                  Espacio libre para las piernas:{" "}
+                  <b className="text-foreground">{lib.libreEscritorio(st.W, st.izq, st.der)} cm</b>
+                  {" · "}módulos de {lib.MODULO_CM} cm. Si no quedan {lib.LIBRE_MIN_CM} cm libres,
+                  ese lado pasa a pata.
+                </p>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {(st.izq === "cajonera" || st.der === "cajonera") && (
+                    <Contador
+                      label="Cajones"
+                      value={st.n}
+                      min={T.n[0]}
+                      max={T.n[1]}
+                      onChange={(n) => apply({ n })}
+                    />
+                  )}
+                  {(st.izq === "estantes" || st.der === "estantes") && (
+                    <Contador
+                      label="Estantes de la columna"
+                      value={st.e}
+                      min={T.e[0]}
+                      max={T.e[1]}
+                      onChange={(e) => apply({ e })}
+                    />
+                  )}
+                  <Contador
+                    label="Repisas en la pared"
+                    value={st.r ?? 0}
+                    min={0}
+                    max={3}
+                    onChange={(r) => apply({ r })}
+                  />
+                </div>
+              </div>
+            )}
+
             <span className="mb-1.5 flex justify-between text-sm font-semibold text-foreground">
-              Material{" "}
+              {st.k === "escritorio" ? "Color del cuerpo" : "Material"}{" "}
               <span className="font-medium text-muted-foreground">
                 {st.m}
                 {lib?.MATERIALS[st.m]?.grp === "Melamina" ? ` · ${lib.ESPESOR_MM} mm` : ""}
@@ -304,6 +383,45 @@ export function Configurator() {
                 </button>
               ))}
             </div>
+
+            {st.k === "escritorio" && (
+              <div className="mt-4">
+                <span className="mb-1.5 flex justify-between text-sm font-semibold text-foreground">
+                  Color de la tapa
+                  <span className="font-medium text-muted-foreground">
+                    {st.mt ? st.mt : "Igual al cuerpo"}
+                  </span>
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => apply({ mt: "" })}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-[12.5px] font-medium",
+                      !st.mt ? "border-primary ring-2 ring-inset ring-primary" : "border-border",
+                    )}
+                  >
+                    Igual al cuerpo
+                  </button>
+                  {MATS.map(([name, m]) => (
+                    <button
+                      key={name}
+                      type="button"
+                      title={name}
+                      aria-label={`Tapa ${name}`}
+                      onClick={() => apply({ mt: name })}
+                      className={cn(
+                        "size-9 rounded-full border-2",
+                        st.mt === name
+                          ? "border-primary ring-2 ring-primary ring-offset-2"
+                          : "border-black/10",
+                      )}
+                      style={{ background: m.css }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Button
               type="button"
@@ -384,4 +502,36 @@ function Contador({
       </div>
     </div>
   );
+}
+
+type Lib3D = typeof import("@/lib/furniture3d");
+
+const mm = (lib: Lib3D, m: string) =>
+  `${m.toLowerCase()}${lib.MATERIALS[m]?.grp === "Melamina" ? ` ${lib.ESPESOR_MM} mm` : ""}`;
+
+function configGeneral(lib: Lib3D, st: FurnitureState, t: TypeDef) {
+  return [
+    `${t.lab.toLowerCase()} de ${st.W}×${st.H}×${st.D} cm`,
+    st.n ? `${st.n} ${t.nl.toLowerCase()}` : `sin ${t.nl.toLowerCase()}`,
+    st.e ? `${st.e} ${st.e === 1 ? "estante" : "estantes"}` : "sin estantes",
+    mm(lib, st.m),
+  ];
+}
+
+function configEscritorio(lib: Lib3D, st: FurnitureState) {
+  const lado = (l?: LadoEscritorio) =>
+    l === "cajonera"
+      ? `cajonera de ${st.n} cajones (${lib.MODULO_CM} cm)`
+      : l === "estantes"
+        ? `columna con ${st.e} ${st.e === 1 ? "estante" : "estantes"} (${lib.MODULO_CM} cm)`
+        : "pata lateral";
+  const r = st.r ?? 0;
+  return [
+    `escritorio de ${st.W}×${st.H}×${st.D} cm`,
+    `izquierda: ${lado(st.izq)}`,
+    `derecha: ${lado(st.der)}`,
+    ...(r ? [`${r} ${r === 1 ? "repisa" : "repisas"} en la pared`] : []),
+    `cuerpo ${mm(lib, st.m)}`,
+    `tapa ${st.mt ? mm(lib, st.mt) : "igual al cuerpo"}`,
+  ];
 }
