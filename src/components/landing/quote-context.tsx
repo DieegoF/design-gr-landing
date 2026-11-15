@@ -103,22 +103,24 @@ export function medidasTexto(q: QuoteState) {
     .join(", ");
 }
 
-/** `adjunto`: la imagen viaja en el mismo envío (compartir nativo), no "acá abajo". */
-export function armarMensaje(q: QuoteState, adjunto = false) {
+/** `link`: página con la imagen del 3D (WhatsApp muestra su miniatura en el chat). */
+export function armarMensaje(q: QuoteState, link = "") {
   const L: string[] = [];
   L.push(`Hola Design.gr! Soy ${q.nombre.trim() || "…"}. Quiero presupuesto para:`);
   L.push(`• Mueble: ${q.tipo || "…"}`);
   if (q.ref) L.push(`• Me gusta este trabajo: "${q.ref}"`);
   if (q.config) L.push(`• Lo armé en el 3D: ${q.config}`);
+  if (link) L.push(`• Mi diseño 3D: ${link}`);
   const m = medidasTexto(q);
   if (m) L.push(`• Medidas: ${m}`);
   if (q.material) L.push(`• Material: ${q.material}`);
   if (q.zona) L.push(`• Zona: ${q.zona}`);
   if (q.plazo) L.push(`• Para cuándo: ${q.plazo}`);
   if (q.detalle.trim()) L.push(`• Detalle: ${q.detalle.trim()}`);
-  if (q.config || q.fotos) {
-    const parts = [q.config ? "la imagen del diseño 3D" : "", q.fotos ? (q.fotos > 1 ? "las fotos del espacio" : "la foto del espacio") : ""].filter(Boolean);
-    L.push(adjunto ? `Te adjunto ${parts.join(" y ")}.` : `Te mando ${parts.join(" y ")} acá abajo.`);
+  const imgAparte = !!q.config && !link;
+  if (imgAparte || q.fotos) {
+    const parts = [imgAparte ? "la imagen del diseño 3D" : "", q.fotos ? (q.fotos > 1 ? "las fotos del espacio" : "la foto del espacio") : ""].filter(Boolean);
+    L.push(`Te mando ${parts.join(" y ")} acá abajo.`);
   }
   return L.join("\n");
 }

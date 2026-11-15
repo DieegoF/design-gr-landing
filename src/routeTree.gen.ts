@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ApiDisenoRouteImport } from './routes/api/diseno'
+import { Route as DIdRouteImport } from './routes/d/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +24,49 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDisenoRoute = ApiDisenoRouteImport.update({
+  id: '/api/diseno',
+  path: '/api/diseno',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DIdRoute = DIdRouteImport.update({
+  id: '/d/$id',
+  path: '/d/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/diseno': typeof ApiDisenoRoute
+  '/d/$id': typeof DIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/diseno': typeof ApiDisenoRoute
+  '/d/$id': typeof DIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/diseno': typeof ApiDisenoRoute
+  '/d/$id': typeof DIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sitemap.xml'
+  fullPaths: '/' | '/sitemap.xml' | '/api/diseno' | '/d/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sitemap.xml'
-  id: '__root__' | '/' | '/sitemap.xml'
+  to: '/' | '/sitemap.xml' | '/api/diseno' | '/d/$id'
+  id: '__root__' | '/' | '/sitemap.xml' | '/api/diseno' | '/d/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiDisenoRoute: typeof ApiDisenoRoute
+  DIdRoute: typeof DIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +85,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/diseno': {
+      id: '/api/diseno'
+      path: '/api/diseno'
+      fullPath: '/api/diseno'
+      preLoaderRoute: typeof ApiDisenoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/d/$id': {
+      id: '/d/$id'
+      path: '/d/$id'
+      fullPath: '/d/$id'
+      preLoaderRoute: typeof DIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiDisenoRoute: ApiDisenoRoute,
+  DIdRoute: DIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
