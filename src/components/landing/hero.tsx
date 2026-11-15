@@ -98,7 +98,7 @@ export function Hero() {
           <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
             {[
               "Diseño, fabricación e instalación",
-              "Melamina, laqueado o madera maciza",
+              "Melamina 18 mm o MDF",
               "Respondemos por WhatsApp",
             ].map((t) => (
               <span key={t}>

@@ -8,7 +8,7 @@ const services = [
     icon: Utensils,
     title: "Cocinas",
     description:
-      "Diseño y fabricación de muebles de cocina funcionales, con terminaciones en melamina, laqueado o madera maciza.",
+      "Diseño y fabricación de muebles de cocina funcionales, con terminaciones en melamina de 18 mm o MDF.",
   },
   {
     icon: DoorOpen,
@@ -48,10 +48,7 @@ export function Services() {
   return (
     <section id="servicios" className="bg-secondary px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div
-          ref={ref}
-          className={cn("mb-12 max-w-2xl fade-in", isInView && "fade-in-visible")}
-        >
+        <div ref={ref} className={cn("mb-12 max-w-2xl fade-in", isInView && "fade-in-visible")}>
           <p className="text-sm font-medium uppercase tracking-widest text-accent">Servicios</p>
           <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
             Soluciones en madera para cada espacio
