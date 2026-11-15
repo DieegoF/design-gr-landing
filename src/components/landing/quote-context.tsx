@@ -135,7 +135,8 @@ export function armarMensaje(q: QuoteState, link = "", fotosRef: string[] = [], 
   if (link) L.push(`• Mi diseño 3D: ${link}`);
   const m = medidasTexto(q);
   if (m) L.push(`• Medidas: ${m}`);
-  if (q.material) L.push(`• Material: ${q.material}`);
+  if (q.material)
+    L.push(`• Material: ${q.material === "Melamina" ? "Melamina 18 mm" : q.material}`);
   if (q.zona) L.push(`• Zona: ${q.zona}`);
   if (q.plazo) L.push(`• Para cuándo: ${q.plazo}`);
   if (q.detalle.trim()) L.push(`• Detalle: ${q.detalle.trim()}`);

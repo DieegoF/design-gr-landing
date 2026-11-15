@@ -11,12 +11,46 @@ const images: {
   tipo: string;
   preset?: Partial<FurnitureState> & { k: FurnitureKind };
 }[] = [
-  { src: "/images/gallery-1.jpeg", alt: "Placard con puertas corredizas", title: "Placard a medida", tipo: "Placard / vestidor", preset: { k: "placard", W: 240, H: 260, D: 60, n: 4, m: "Melamina blanca" } },
-  { src: "/images/gallery-2.jpeg", alt: "Interior de vestidor con cajonera", title: "Vestidor con cajonera", tipo: "Placard / vestidor", preset: { k: "placard", W: 300, H: 250, D: 60, n: 6, m: "Melamina roble" } },
-  { src: "/images/gallery-3.jpeg", alt: "Biblioteca y estantería en madera", title: "Biblioteca / Estantería", tipo: "Biblioteca / estantería", preset: { k: "biblio", W: 220, H: 230, D: 35, n: 3, m: "Madera maciza nogal" } },
-  { src: "/images/gallery-4.jpeg", alt: "Revestimiento decorativo en listones de madera", title: "Revestimiento en listones", tipo: "Mueble TV / living", preset: { k: "rack", W: 240, H: 250, D: 40, n: 3, m: "Melamina roble" } },
-  { src: "/images/gallery-5.jpeg", alt: "Diseño integral de mobiliario comercial", title: "Diseño integral de local", tipo: "Diseño integral" },
-  { src: "/images/gallery-6.jpeg", alt: "Mobiliario comercial a medida", title: "Mobiliario comercial", tipo: "Diseño integral" },
+  {
+    src: "/images/gallery-1.jpeg",
+    alt: "Placard con puertas corredizas",
+    title: "Placard a medida",
+    tipo: "Placard / vestidor",
+    preset: { k: "placard", W: 240, H: 260, D: 60, n: 4, m: "Melamina blanca" },
+  },
+  {
+    src: "/images/gallery-2.jpeg",
+    alt: "Interior de vestidor con cajonera",
+    title: "Vestidor con cajonera",
+    tipo: "Placard / vestidor",
+    preset: { k: "placard", W: 300, H: 250, D: 60, n: 6, m: "Melamina roble" },
+  },
+  {
+    src: "/images/gallery-3.jpeg",
+    alt: "Biblioteca y estantería en madera",
+    title: "Biblioteca / Estantería",
+    tipo: "Biblioteca / estantería",
+    preset: { k: "biblio", W: 220, H: 230, D: 35, n: 3, m: "Melamina nogal" },
+  },
+  {
+    src: "/images/gallery-4.jpeg",
+    alt: "Revestimiento decorativo en listones de madera",
+    title: "Revestimiento en listones",
+    tipo: "Mueble TV / living",
+    preset: { k: "rack", W: 240, H: 250, D: 40, n: 3, m: "Melamina roble" },
+  },
+  {
+    src: "/images/gallery-5.jpeg",
+    alt: "Diseño integral de mobiliario comercial",
+    title: "Diseño integral de local",
+    tipo: "Diseño integral",
+  },
+  {
+    src: "/images/gallery-6.jpeg",
+    alt: "Mobiliario comercial a medida",
+    title: "Mobiliario comercial",
+    tipo: "Diseño integral",
+  },
 ];
 
 export function Gallery() {
@@ -36,7 +70,9 @@ export function Gallery() {
     <section id="galeria" className="bg-background px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div ref={ref} className={cn("mb-10 fade-in", isInView && "fade-in-visible")}>
-          <p className="text-sm font-medium uppercase tracking-widest text-accent">Trabajos realizados</p>
+          <p className="text-sm font-medium uppercase tracking-widest text-accent">
+            Trabajos realizados
+          </p>
           <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
             ¿Te gusta alguno?
           </h2>
@@ -49,7 +85,10 @@ export function Gallery() {
           {images.map((image, index) => (
             <div
               key={image.title}
-              className={cn("flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card fade-in", isInView && "fade-in-visible")}
+              className={cn(
+                "flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card fade-in",
+                isInView && "fade-in-visible",
+              )}
               style={{ transitionDelay: `${index * 80}ms` }}
             >
               <div className="overflow-hidden bg-muted">

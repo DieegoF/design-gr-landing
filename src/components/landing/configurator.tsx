@@ -28,6 +28,7 @@ export function Configurator() {
     H: 75,
     D: 60,
     n: 3,
+    e: 1,
     m: "Melamina roble",
   });
   const [open, setOpen] = useState(false);
@@ -76,7 +77,7 @@ export function Configurator() {
   const setKind = (k: FurnitureKind, preset?: Partial<FurnitureState>) => {
     if (!lib) return;
     const t = lib.TYPES[k];
-    apply({ k, W: t.W[2], H: t.H[2], D: t.D[2], n: t.n[2], ...preset });
+    apply({ k, W: t.W[2], H: t.H[2], D: t.D[2], n: t.n[2], e: t.e[2], ...preset });
   };
 
   // pedidos desde el hero o la galería
@@ -91,7 +92,12 @@ export function Configurator() {
     update({
       tipo: t.tipo,
       material: lib.MATERIALS[st.m].grp,
-      config: `${t.lab.toLowerCase()} de ${st.W}×${st.H}×${st.D} cm, ${st.n ? `${st.n} ${t.nl.toLowerCase()}` : `sin ${t.nl.toLowerCase()}`}, ${st.m.toLowerCase()}`,
+      config: [
+        `${t.lab.toLowerCase()} de ${st.W}×${st.H}×${st.D} cm`,
+        st.n ? `${st.n} ${t.nl.toLowerCase()}` : `sin ${t.nl.toLowerCase()}`,
+        st.e ? `${st.e} ${st.e === 1 ? "estante" : "estantes"}` : "sin estantes",
+        `${st.m.toLowerCase()}${lib.MATERIALS[st.m].grp === "Melamina" ? ` ${lib.ESPESOR_MM} mm` : ""}`,
+      ].join(", "),
       an: String(st.W),
       al: String(st.H),
       pr: String(st.D),
@@ -252,34 +258,30 @@ export function Configurator() {
               ))}
 
             {T && (
-              <div className="mb-4">
-                <span className="mb-1.5 block text-sm font-semibold text-foreground">{T.nl}</span>
-                <div className="flex items-center gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    aria-label="menos"
-                    onClick={() => st.n > T.n[0] && apply({ n: st.n - 1 })}
-                  >
-                    <Minus className="size-4" />
-                  </Button>
-                  <b className="min-w-7 text-center text-lg">{st.n}</b>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    aria-label="más"
-                    onClick={() => st.n < T.n[1] && apply({ n: st.n + 1 })}
-                  >
-                    <Plus className="size-4" />
-                  </Button>
-                </div>
+              <div className="mb-4 grid grid-cols-2 gap-3">
+                <Contador
+                  label={T.nl}
+                  value={st.n}
+                  min={T.n[0]}
+                  max={T.n[1]}
+                  onChange={(n) => apply({ n })}
+                />
+                <Contador
+                  label={T.el}
+                  value={st.e}
+                  min={T.e[0]}
+                  max={T.e[1]}
+                  onChange={(e) => apply({ e })}
+                />
               </div>
             )}
 
             <span className="mb-1.5 flex justify-between text-sm font-semibold text-foreground">
-              Material <span className="font-medium text-muted-foreground">{st.m}</span>
+              Material{" "}
+              <span className="font-medium text-muted-foreground">
+                {st.m}
+                {lib?.MATERIALS[st.m]?.grp === "Melamina" ? ` · ${lib.ESPESOR_MM} mm` : ""}
+              </span>
             </span>
             <div className="grid grid-cols-3 gap-2">
               {MATS.map(([name, m]) => (
@@ -336,5 +338,50 @@ export function Configurator() {
         </div>
       </div>
     </section>
+  );
+}
+
+function Contador({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <span className="mb-1.5 block text-sm font-semibold leading-tight text-foreground">
+        {label}
+      </span>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label={`menos ${label.toLowerCase()}`}
+          disabled={value <= min}
+          onClick={() => onChange(value - 1)}
+        >
+          <Minus className="size-4" />
+        </Button>
+        <b className="min-w-6 text-center text-lg tabular-nums">{value}</b>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label={`más ${label.toLowerCase()}`}
+          disabled={value >= max}
+          onClick={() => onChange(value + 1)}
+        >
+          <Plus className="size-4" />
+        </Button>
+      </div>
+    </div>
   );
 }

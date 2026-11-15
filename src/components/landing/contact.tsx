@@ -15,19 +15,13 @@ export function Contact() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const text = `Hola, soy ${form.name}. ${form.message} (Tel: ${form.phone})`;
-    window.open(
-      `https://wa.me/541164321329?text=${encodeURIComponent(text)}`,
-      "_blank",
-    );
+    window.open(`https://wa.me/541164321329?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   return (
     <section id="contacto" className="bg-secondary px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div
-          ref={ref}
-          className={cn("mb-12 text-center fade-in", isInView && "fade-in-visible")}
-        >
+        <div ref={ref} className={cn("mb-12 text-center fade-in", isInView && "fade-in-visible")}>
           <p className="text-sm font-medium uppercase tracking-widest text-accent">Contacto</p>
           <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
             Hablemos de tu proyecto

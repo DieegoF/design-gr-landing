@@ -36,10 +36,10 @@ export function About() {
             </h2>
             <div className="mt-6 space-y-4 text-muted-foreground">
               <p>
-                En Design.gr combinamos años de experiencia en carpintería con un enfoque moderno
-                de diseño. Cada mueble que fabricamos es el resultado de un trabajo artesanal
-                cuidadoso, materiales de primera calidad y una escucha activa de lo que necesita cada
-                cliente.
+                En Design.gr combinamos años de experiencia en carpintería con un enfoque moderno de
+                diseño. Cada mueble que fabricamos es el resultado de un trabajo artesanal
+                cuidadoso, materiales de primera calidad y una escucha activa de lo que necesita
+                cada cliente.
               </p>
               <p>
                 Nos especializamos en muebles a medida para cocinas, dormitorios, baños, livings y

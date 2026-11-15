@@ -32,10 +32,7 @@ export function Testimonials() {
   return (
     <section className="bg-background px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div
-          ref={ref}
-          className={cn("mb-12 text-center fade-in", isInView && "fade-in-visible")}
-        >
+        <div ref={ref} className={cn("mb-12 text-center fade-in", isInView && "fade-in-visible")}>
           <p className="text-sm font-medium uppercase tracking-widest text-accent">Testimonios</p>
           <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
             Lo que dicen nuestros clientes
@@ -45,10 +42,7 @@ export function Testimonials() {
           {testimonials.map((testimonial, index) => (
             <Card
               key={testimonial.name}
-              className={cn(
-                "fade-in border-border/60 bg-card",
-                isInView && "fade-in-visible",
-              )}
+              className={cn("fade-in border-border/60 bg-card", isInView && "fade-in-visible")}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               <CardContent className="p-6">

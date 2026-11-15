@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { OTRO, TIPOS, WHATSAPP, armarMensaje, medidasTexto, useQuote } from "./quote-context";
 
-const MATERIALES = ["Melamina", "Laqueado", "Madera maciza", "No sé, que me asesoren"];
+const MATERIALES = ["Melamina", "MDF", "No sé, que me asesoren"];
 const ZONAS = ["La Plata", "CABA", "AMBA (otra zona)"];
 const PLAZOS = ["Lo antes posible", "En 1–2 meses", "Estoy averiguando"];
 
