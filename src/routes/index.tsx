@@ -14,11 +14,11 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Design.gr | Muebles a medida en La Plata, CABA y AMBA" },
+      { title: "Design.gr | Escritorios y muebles a medida en La Plata, CABA y AMBA" },
       {
         name: "description",
         content:
-          "Carpintería de muebles a medida en La Plata. Cocinas, placards, vestidores, escritorios, bibliotecas y muebles de baño. Diseño integral y trabajos en CABA y AMBA.",
+          "Especialistas en escritorios a medida en La Plata. También cocinas, placards, vestidores, bibliotecas y muebles de baño. Diseño integral y trabajos en CABA y AMBA.",
       },
     ],
   }),

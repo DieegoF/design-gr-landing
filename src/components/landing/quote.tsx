@@ -3,7 +3,7 @@ import { Camera, Download, Instagram, MapPin, MessageCircle } from "lucide-react
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { TIPOS, WHATSAPP, armarMensaje, medidasTexto, useQuote } from "./quote-context";
+import { OTRO, TIPOS, WHATSAPP, armarMensaje, medidasTexto, useQuote } from "./quote-context";
 
 const MATERIALES = ["Melamina", "Laqueado", "Madera maciza", "No sé, que me asesoren"];
 const ZONAS = ["La Plata", "CABA", "AMBA (otra zona)"];
@@ -82,9 +82,11 @@ export function Quote() {
 
   const link = subida?.estado === "listo" ? subida.link : "";
   const msg = useMemo(() => armarMensaje(q, link), [q, link]);
-  const done = [!!q.tipo, !!medidasTexto(q), !!q.material, !!(q.zona && q.plazo), !!q.nombre.trim()];
+  const esOtro = q.tipo === OTRO;
+  const tipoOk = !!q.tipo && (!esOtro || !!q.consulta.trim());
+  const done = [tipoOk, !!medidasTexto(q), !!q.material, !!(q.zona && q.plazo), !!q.nombre.trim()];
   const n = done.filter(Boolean).length;
-  const ok = !!q.tipo && !!q.nombre.trim();
+  const ok = tipoOk && !!q.nombre.trim();
   const waLink = (texto: string) => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`;
   const waUrl = waLink(msg);
 
@@ -140,6 +142,23 @@ export function Quote() {
             <fieldset className="mb-5">
               <legend className="mb-2 font-semibold text-foreground">1. ¿Qué mueble?</legend>
               <Chips value={q.tipo} options={TIPOS} onChange={(v) => update({ tipo: v, ref: "", config: "", img: "" })} />
+              {esOtro && (
+                <label className="mt-3 block">
+                  <span className="mb-1.5 block text-sm font-semibold text-foreground">
+                    Contanos qué mueble necesitás
+                  </span>
+                  <Textarea
+                    rows={4}
+                    placeholder="Ej.: un mueble para la entrada con zapatero, perchero y espejo; va en un hueco de 120 cm."
+                    value={q.consulta}
+                    onChange={(e) => update({ consulta: e.target.value })}
+                    className="border-accent/60"
+                  />
+                  <small className="mt-1 block text-xs text-muted-foreground">
+                    Para qué lo vas a usar, dónde va y cualquier idea que tengas. Si tenés una foto de referencia, cargala abajo.
+                  </small>
+                </label>
+              )}
             </fieldset>
 
             <fieldset className="mb-5">
@@ -258,7 +277,7 @@ export function Quote() {
               </button>
             )}
             <p className="mt-2 text-center text-xs text-muted-foreground">
-              {ok ? (n < 5 ? "Podés enviarlo ya; cuanto más completes, más preciso el precio." : "Listo para enviar.") : "Completá el tipo de mueble y tu nombre."}
+              {ok ? (n < 5 ? "Podés enviarlo ya; cuanto más completes, más preciso el precio." : "Listo para enviar.") : esOtro ? "Contanos qué mueble necesitás y completá tu nombre." : "Completá el tipo de mueble y tu nombre."}
             </p>
 
             <div className="mt-6 space-y-2 text-sm text-muted-foreground">

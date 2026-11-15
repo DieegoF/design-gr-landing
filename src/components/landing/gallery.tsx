@@ -13,7 +13,7 @@ const images: {
 }[] = [
   { src: "/images/gallery-1.jpeg", alt: "Placard con puertas corredizas", title: "Placard a medida", tipo: "Placard / vestidor", preset: { k: "placard", W: 240, H: 260, D: 60, n: 4, m: "Melamina blanca" } },
   { src: "/images/gallery-2.jpeg", alt: "Interior de vestidor con cajonera", title: "Vestidor con cajonera", tipo: "Placard / vestidor", preset: { k: "placard", W: 300, H: 250, D: 60, n: 6, m: "Melamina roble" } },
-  { src: "/images/gallery-3.jpeg", alt: "Biblioteca y estantería en madera", title: "Biblioteca / Estantería", tipo: "Escritorio / biblioteca", preset: { k: "biblio", W: 220, H: 230, D: 35, n: 3, m: "Madera maciza nogal" } },
+  { src: "/images/gallery-3.jpeg", alt: "Biblioteca y estantería en madera", title: "Biblioteca / Estantería", tipo: "Biblioteca / estantería", preset: { k: "biblio", W: 220, H: 230, D: 35, n: 3, m: "Madera maciza nogal" } },
   { src: "/images/gallery-4.jpeg", alt: "Revestimiento decorativo en listones de madera", title: "Revestimiento en listones", tipo: "Mueble TV / living", preset: { k: "rack", W: 240, H: 250, D: 40, n: 3, m: "Melamina roble" } },
   { src: "/images/gallery-5.jpeg", alt: "Diseño integral de mobiliario comercial", title: "Diseño integral de local", tipo: "Diseño integral" },
   { src: "/images/gallery-6.jpeg", alt: "Mobiliario comercial a medida", title: "Mobiliario comercial", tipo: "Diseño integral" },

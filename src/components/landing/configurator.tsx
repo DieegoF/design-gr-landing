@@ -1,14 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, DoorOpen, Eye, Minus, Plus, User } from "lucide-react";
+import { Box, DoorOpen, Eye, MessageSquarePlus, Minus, Plus, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { scrollToSection } from "@/lib/scroll";
-import { useQuote } from "./quote-context";
-import type { FurnitureKind, FurnitureScene, FurnitureState, TypeDef, MaterialDef } from "@/lib/furniture3d";
+import { OTRO, useQuote } from "./quote-context";
+import type {
+  FurnitureKind,
+  FurnitureScene,
+  FurnitureState,
+  TypeDef,
+  MaterialDef,
+} from "@/lib/furniture3d";
 
 type Lib = typeof import("@/lib/furniture3d");
 
-const KINDS: FurnitureKind[] = ["placard", "cocina", "biblio", "rack", "vanit"];
+const KINDS: FurnitureKind[] = ["escritorio", "placard", "cocina", "biblio", "rack", "vanit"];
 
 export function Configurator() {
   const { update, cfgReq } = useQuote();
@@ -16,7 +22,14 @@ export function Configurator() {
   const stageRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<FurnitureScene | null>(null);
   const [lib, setLib] = useState<Lib | null>(null);
-  const [st, setSt] = useState<FurnitureState>({ k: "placard", W: 240, H: 250, D: 60, n: 4, m: "Melamina blanca" });
+  const [st, setSt] = useState<FurnitureState>({
+    k: "escritorio",
+    W: 140,
+    H: 75,
+    D: 60,
+    n: 3,
+    m: "Melamina roble",
+  });
   const [open, setOpen] = useState(false);
   const [person, setPerson] = useState(false);
   const [front, setFront] = useState(false);
@@ -78,7 +91,7 @@ export function Configurator() {
     update({
       tipo: t.tipo,
       material: lib.MATERIALS[st.m].grp,
-      config: `${t.lab.toLowerCase()} de ${st.W}×${st.H}×${st.D} cm, ${st.n} ${t.nl.toLowerCase()}, ${st.m.toLowerCase()}`,
+      config: `${t.lab.toLowerCase()} de ${st.W}×${st.H}×${st.D} cm, ${st.n ? `${st.n} ${t.nl.toLowerCase()}` : `sin ${t.nl.toLowerCase()}`}, ${st.m.toLowerCase()}`,
       an: String(st.W),
       al: String(st.H),
       pr: String(st.D),
@@ -108,7 +121,11 @@ export function Configurator() {
             ref={stageRef}
             className="relative h-[clamp(360px,62vh,560px)] min-w-0 overflow-hidden rounded-2xl border border-border/60 bg-[#efe8de] lg:sticky lg:top-24"
           >
-            <canvas ref={canvasRef} className="block size-full cursor-grab touch-pan-y active:cursor-grabbing" aria-label="Maqueta 3D del mueble" />
+            <canvas
+              ref={canvasRef}
+              className="block size-full cursor-grab touch-pan-y active:cursor-grabbing"
+              aria-label="Maqueta 3D del mueble"
+            />
             {failed && (
               <p className="absolute inset-0 grid place-items-center p-6 text-center text-sm text-muted-foreground">
                 Tu navegador no pudo mostrar el 3D. Igual podés pedir tu presupuesto abajo.
@@ -135,9 +152,28 @@ export function Configurator() {
             </span>
             <div className="absolute inset-x-2 bottom-2 flex flex-wrap justify-center gap-1.5">
               {[
-                { on: open, label: open ? "Cerrar" : "Abrir puertas", icon: DoorOpen, fn: () => setOpen(!!sceneRef.current?.toggleOpen()) },
-                { on: front, label: "Vista de frente", icon: Eye, fn: () => setFront(!!sceneRef.current?.toggleFront()) },
-                { on: person, label: "Persona 1,70 m", icon: User, fn: () => setPerson(!!sceneRef.current?.togglePerson()) },
+                {
+                  on: open,
+                  label: open
+                    ? "Cerrar"
+                    : st.k === "escritorio"
+                      ? "Abrir cajones"
+                      : "Abrir puertas",
+                  icon: DoorOpen,
+                  fn: () => setOpen(!!sceneRef.current?.toggleOpen()),
+                },
+                {
+                  on: front,
+                  label: "Vista de frente",
+                  icon: Eye,
+                  fn: () => setFront(!!sceneRef.current?.toggleFront()),
+                },
+                {
+                  on: person,
+                  label: "Persona 1,70 m",
+                  icon: User,
+                  fn: () => setPerson(!!sceneRef.current?.togglePerson()),
+                },
               ].map((b) => (
                 <button
                   key={b.label}
@@ -145,7 +181,9 @@ export function Configurator() {
                   onClick={b.fn}
                   className={cn(
                     "inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[13px] font-semibold transition-colors",
-                    b.on ? "border-primary bg-primary text-primary-foreground" : "border-border/60 bg-card/95 text-foreground",
+                    b.on
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border/60 bg-card/95 text-foreground",
                   )}
                 >
                   <b.icon className="size-4" />
@@ -164,10 +202,24 @@ export function Configurator() {
                   onClick={() => setKind(k)}
                   className={cn(
                     "flex-none rounded-xl border px-3 py-2 text-[13.5px] font-semibold transition-colors",
-                    st.k === k ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground",
+                    st.k === k
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-foreground",
                   )}
                 >
                   {lib ? lib.TYPES[k].lab : "…"}
+                  {k === "escritorio" && (
+                    <span
+                      className={cn(
+                        "ml-1.5 rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide",
+                        st.k === k
+                          ? "bg-primary-foreground/20"
+                          : "bg-accent text-primary-foreground",
+                      )}
+                    >
+                      Especialidad
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -183,13 +235,15 @@ export function Configurator() {
                 <label key={key} className="mb-4 block">
                   <span className="mb-1.5 flex justify-between text-sm font-semibold text-foreground">
                     {label}
-                    <span className="font-medium tabular-nums text-accent-foreground/80">{st[key]} cm</span>
+                    <span className="font-medium tabular-nums text-accent-foreground/80">
+                      {st[key]} cm
+                    </span>
                   </span>
                   <input
                     type="range"
                     min={T[key][0]}
                     max={T[key][1]}
-                    step={step}
+                    step={T[key][1] - T[key][0] <= 20 ? 1 : step}
                     value={st[key]}
                     onChange={(e) => apply({ [key]: +e.target.value })}
                     className="w-full accent-[var(--primary)]"
@@ -201,11 +255,23 @@ export function Configurator() {
               <div className="mb-4">
                 <span className="mb-1.5 block text-sm font-semibold text-foreground">{T.nl}</span>
                 <div className="flex items-center gap-3">
-                  <Button type="button" variant="outline" size="icon" aria-label="menos" onClick={() => st.n > T.n[0] && apply({ n: st.n - 1 })}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label="menos"
+                    onClick={() => st.n > T.n[0] && apply({ n: st.n - 1 })}
+                  >
                     <Minus className="size-4" />
                   </Button>
                   <b className="min-w-7 text-center text-lg">{st.n}</b>
-                  <Button type="button" variant="outline" size="icon" aria-label="más" onClick={() => st.n < T.n[1] && apply({ n: st.n + 1 })}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label="más"
+                    onClick={() => st.n < T.n[1] && apply({ n: st.n + 1 })}
+                  >
                     <Plus className="size-4" />
                   </Button>
                 </div>
@@ -223,21 +289,45 @@ export function Configurator() {
                   onClick={() => apply({ m: name })}
                   className={cn(
                     "rounded-xl border bg-background p-1.5 text-left text-[12px] leading-tight text-foreground",
-                    st.m === name ? "border-primary ring-2 ring-inset ring-primary" : "border-border",
+                    st.m === name
+                      ? "border-primary ring-2 ring-inset ring-primary"
+                      : "border-border",
                   )}
                 >
-                  <i className="mb-1.5 block h-7 rounded-md border border-black/10" style={{ background: m.css }} />
+                  <i
+                    className="mb-1.5 block h-7 rounded-md border border-black/10"
+                    style={{ background: m.css }}
+                  />
                   {name}
                 </button>
               ))}
             </div>
 
-            <Button type="button" size="lg" className="mt-5 h-auto w-full flex-col gap-0.5 py-3" onClick={usar} disabled={!lib}>
+            <Button
+              type="button"
+              size="lg"
+              className="mt-5 h-auto w-full flex-col gap-0.5 py-3"
+              onClick={usar}
+              disabled={!lib}
+            >
               <span className="flex items-center gap-2">
                 <Box className="size-4" /> Usar este diseño en mi presupuesto
               </span>
-              <small className="text-xs font-normal opacity-80">Se cargan las medidas y el material en el formulario</small>
+              <small className="text-xs font-normal opacity-80">
+                Se cargan las medidas y el material en el formulario
+              </small>
             </Button>
+            <button
+              type="button"
+              onClick={() => {
+                update({ tipo: OTRO, ref: "", config: "", img: "" });
+                scrollToSection("presupuesto");
+              }}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-accent/70 px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-secondary"
+            >
+              <MessageSquarePlus className="size-4 text-accent" /> ¿No está tu mueble? Hacé una
+              consulta
+            </button>
             <p className="mt-3 text-xs text-muted-foreground">
               Es una maqueta para darte una idea de proporciones y terminaciones. El diseño final lo
               definimos con vos.
