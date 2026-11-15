@@ -3,19 +3,25 @@ import type { FurnitureKind, FurnitureState } from "@/lib/furniture3d";
 
 export const WHATSAPP = "541164321329";
 
+/** Mueble que no está en la lista: se manda como consulta con descripción libre. */
+export const OTRO = "Otro mueble";
+
 export const TIPOS = [
+  "Escritorio",
   "Cocina",
   "Placard / vestidor",
-  "Escritorio / biblioteca",
+  "Biblioteca / estantería",
   "Mueble de baño",
   "Mueble TV / living",
   "Diseño integral",
+  OTRO,
 ] as const;
 
 export const TIPO_TO_KIND: Partial<Record<string, FurnitureKind>> = {
+  Escritorio: "escritorio",
   Cocina: "cocina",
   "Placard / vestidor": "placard",
-  "Escritorio / biblioteca": "biblio",
+  "Biblioteca / estantería": "biblio",
   "Mueble de baño": "vanit",
   "Mueble TV / living": "rack",
 };
@@ -34,6 +40,8 @@ export interface QuoteState {
   noMed: boolean;
   nombre: string;
   detalle: string;
+  /** Descripción del mueble cuando eligió "Otro mueble". */
+  consulta: string;
   fotos: number;
 }
 
@@ -51,6 +59,7 @@ const empty: QuoteState = {
   noMed: false,
   nombre: "",
   detalle: "",
+  consulta: "",
   fotos: 0,
 };
 
@@ -106,8 +115,14 @@ export function medidasTexto(q: QuoteState) {
 /** `link`: página con la imagen del 3D (WhatsApp muestra su miniatura en el chat). */
 export function armarMensaje(q: QuoteState, link = "") {
   const L: string[] = [];
-  L.push(`Hola Design.gr! Soy ${q.nombre.trim() || "…"}. Quiero presupuesto para:`);
-  L.push(`• Mueble: ${q.tipo || "…"}`);
+  const otro = q.tipo === OTRO;
+  L.push(
+    otro
+      ? `Hola Design.gr! Soy ${q.nombre.trim() || "…"}. Quiero consultar por un mueble que no está en la lista:`
+      : `Hola Design.gr! Soy ${q.nombre.trim() || "…"}. Quiero presupuesto para:`,
+  );
+  if (otro) L.push(`• Lo que necesito: ${q.consulta.trim() || "…"}`);
+  else L.push(`• Mueble: ${q.tipo || "…"}`);
   if (q.ref) L.push(`• Me gusta este trabajo: "${q.ref}"`);
   if (q.config) L.push(`• Lo armé en el 3D: ${q.config}`);
   if (link) L.push(`• Mi diseño 3D: ${link}`);

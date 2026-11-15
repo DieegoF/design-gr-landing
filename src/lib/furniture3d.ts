@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as THREE from "three";
 
-export type FurnitureKind = "placard" | "cocina" | "biblio" | "rack" | "vanit";
+export type FurnitureKind = "escritorio" | "placard" | "cocina" | "biblio" | "rack" | "vanit";
 
 export interface TypeDef {
   lab: string;
@@ -17,11 +17,66 @@ export interface TypeDef {
 }
 
 export const TYPES: Record<FurnitureKind, TypeDef> = {
-  placard: { lab: "Placard / vestidor", tipo: "Placard / vestidor", W: [120, 400, 240], H: [200, 270, 250], D: [50, 70, 60], n: [2, 6, 4], nl: "Puertas", hl: "Alto" },
-  cocina: { lab: "Cocina", tipo: "Cocina", W: [120, 400, 260], H: [200, 250, 220], D: [55, 65, 60], n: [2, 8, 4], nl: "Puertas por fila", hl: "Alto hasta alacenas" },
-  biblio: { lab: "Biblioteca", tipo: "Escritorio / biblioteca", W: [80, 360, 200], H: [180, 270, 220], D: [25, 45, 35], n: [2, 6, 3], nl: "Columnas", hl: "Alto" },
-  rack: { lab: "Rack TV", tipo: "Mueble TV / living", W: [140, 360, 220], H: [150, 270, 240], D: [35, 50, 40], n: [2, 6, 3], nl: "Módulos", hl: "Alto del panel" },
-  vanit: { lab: "Baño", tipo: "Mueble de baño", W: [50, 140, 80], H: [40, 70, 50], D: [40, 55, 46], n: [1, 4, 2], nl: "Puertas", hl: "Alto del mueble" },
+  escritorio: {
+    lab: "Escritorio",
+    tipo: "Escritorio",
+    W: [90, 240, 140],
+    H: [70, 80, 75],
+    D: [45, 80, 60],
+    n: [0, 4, 3],
+    nl: "Cajones",
+    hl: "Alto de la tapa",
+  },
+  placard: {
+    lab: "Placard / vestidor",
+    tipo: "Placard / vestidor",
+    W: [120, 400, 240],
+    H: [200, 270, 250],
+    D: [50, 70, 60],
+    n: [2, 6, 4],
+    nl: "Puertas",
+    hl: "Alto",
+  },
+  cocina: {
+    lab: "Cocina",
+    tipo: "Cocina",
+    W: [120, 400, 260],
+    H: [200, 250, 220],
+    D: [55, 65, 60],
+    n: [2, 8, 4],
+    nl: "Puertas por fila",
+    hl: "Alto hasta alacenas",
+  },
+  biblio: {
+    lab: "Biblioteca",
+    tipo: "Biblioteca / estantería",
+    W: [80, 360, 200],
+    H: [180, 270, 220],
+    D: [25, 45, 35],
+    n: [2, 6, 3],
+    nl: "Columnas",
+    hl: "Alto",
+  },
+  rack: {
+    lab: "Rack TV",
+    tipo: "Mueble TV / living",
+    W: [140, 360, 220],
+    H: [150, 270, 240],
+    D: [35, 50, 40],
+    n: [2, 6, 3],
+    nl: "Módulos",
+    hl: "Alto del panel",
+  },
+  vanit: {
+    lab: "Baño",
+    tipo: "Mueble de baño",
+    W: [50, 140, 80],
+    H: [40, 70, 50],
+    D: [40, 55, 46],
+    n: [1, 4, 2],
+    nl: "Puertas",
+    hl: "Alto del mueble",
+  },
 };
 
 export interface MaterialDef {
@@ -32,10 +87,16 @@ export interface MaterialDef {
 export const MATERIALS: Record<string, MaterialDef> = {
   "Melamina blanca": { grp: "Melamina", css: "#efece6" },
   "Melamina gris grafito": { grp: "Melamina", css: "#4a4a48" },
-  "Melamina roble": { grp: "Melamina", css: "linear-gradient(90deg,#c9a072,#a87b50,#c79e70,#b0835a)" },
+  "Melamina roble": {
+    grp: "Melamina",
+    css: "linear-gradient(90deg,#c9a072,#a87b50,#c79e70,#b0835a)",
+  },
   "Laqueado verde salvia": { grp: "Laqueado", css: "#8fa38c" },
   "Laqueado negro mate": { grp: "Laqueado", css: "#1f1f1f" },
-  "Madera maciza nogal": { grp: "Madera maciza", css: "linear-gradient(90deg,#7a5234,#5a3a24,#7d5638,#4f331f)" },
+  "Madera maciza nogal": {
+    grp: "Madera maciza",
+    css: "linear-gradient(90deg,#7a5234,#5a3a24,#7d5638,#4f331f)",
+  },
 };
 
 export interface FurnitureState {
@@ -104,7 +165,7 @@ export class FurnitureScene {
   private clock = new THREE.Clock();
   private drag: { x: number; y: number; yaw: number; pitch: number } | null = null;
 
-  st: FurnitureState = { k: "placard", W: 240, H: 250, D: 60, n: 4, m: "Melamina blanca" };
+  st: FurnitureState = { k: "escritorio", W: 140, H: 75, D: 60, n: 3, m: "Melamina roble" };
   open = 0;
   openT = 0;
   person = false;
@@ -136,7 +197,14 @@ export class FurnitureScene {
     sun.position.set(1.4, 4.6, 5.2);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
-    Object.assign(sun.shadow.camera, { left: -4, right: 4, top: 4, bottom: -1, near: 0.5, far: 14 });
+    Object.assign(sun.shadow.camera, {
+      left: -4,
+      right: 4,
+      top: 4,
+      bottom: -1,
+      near: 0.5,
+      far: 14,
+    });
     sun.shadow.bias = -0.0004;
     sun.shadow.radius = 4;
     this.sun = sun;
@@ -144,11 +212,17 @@ export class FurnitureScene {
     const fill = new THREE.DirectionalLight(0xfff4e6, 0.55);
     fill.position.set(-3, 2, 3);
     this.scene.add(fill);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), std({ color: "#cdbca4", roughness: 0.9 }));
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(30, 30),
+      std({ color: "#cdbca4", roughness: 0.9 }),
+    );
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     this.scene.add(floor);
-    const wall = new THREE.Mesh(new THREE.PlaneGeometry(30, 10), std({ color: "#e6dccd", roughness: 0.95 }));
+    const wall = new THREE.Mesh(
+      new THREE.PlaneGeometry(30, 10),
+      std({ color: "#e6dccd", roughness: 0.95 }),
+    );
     wall.position.set(0, 5, -0.004);
     wall.receiveShadow = true;
     this.scene.add(wall);
@@ -175,7 +249,13 @@ export class FurnitureScene {
       SCREEN: std({ color: "#1c2430", roughness: 0.1, metalness: 0.2 }),
       CER: std({ color: "#fbfbfa", roughness: 0.2 }),
       BASIN: std({ color: "#dfe3e4", roughness: 0.15 }),
-      MIRROR: std({ color: "#b7c4c7", metalness: 0.1, roughness: 0.08, emissive: "#8fa2a8", emissiveIntensity: 0.15 }),
+      MIRROR: std({
+        color: "#b7c4c7",
+        metalness: 0.1,
+        roughness: 0.08,
+        emissive: "#8fa2a8",
+        emissiveIntensity: 0.15,
+      }),
       PERSON: std({ color: "#b9b1a6", roughness: 0.9, transparent: true, opacity: 0.85 }),
       SPLASH: std({ color: "#e7e1d8", roughness: 0.4 }),
       SLATBACK: std({ color: "#2a2622", roughness: 0.9 }),
@@ -259,7 +339,16 @@ export class FurnitureScene {
   }
 
   // ---------- construcción ----------
-  private box(w: number, h: number, d: number, x: number, y: number, z: number, m: THREE.Material, par?: THREE.Object3D) {
+  private box(
+    w: number,
+    h: number,
+    d: number,
+    x: number,
+    y: number,
+    z: number,
+    m: THREE.Material,
+    par?: THREE.Object3D,
+  ) {
     const me = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
     me.position.set(x, y, z);
     me.castShadow = me.receiveShadow = true;
@@ -274,7 +363,16 @@ export class FurnitureScene {
     this.G.add(c);
     return c;
   }
-  private door(x0: number, y0: number, w: number, h: number, z: number, m: THREE.Material, left: boolean, handleY: number) {
+  private door(
+    x0: number,
+    y0: number,
+    w: number,
+    h: number,
+    z: number,
+    m: THREE.Material,
+    left: boolean,
+    handleY: number,
+  ) {
     const T = 0.018;
     const p = new THREE.Group();
     p.position.set(left ? x0 : x0 + w, y0, z);
@@ -285,7 +383,15 @@ export class FurnitureScene {
     this.box(0.012, hh, 0.018, dx * (w - 0.035), handleY, T + 0.012, this.M.HANDLE, p);
     this.doors.push({ p, s: left ? -1 : 1 });
   }
-  private drawer(x: number, y: number, w: number, h: number, z: number, d: number, m: THREE.Material) {
+  private drawer(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    z: number,
+    d: number,
+    m: THREE.Material,
+  ) {
     const T = 0.018;
     const g = new THREE.Group();
     g.position.set(x, y, z);
@@ -312,6 +418,78 @@ export class FurnitureScene {
     return { cw, xs };
   }
 
+  private escritorio(W: number, H: number, D: number, n: number, m: THREE.Material) {
+    const T = 0.018,
+      TT = 0.03,
+      M = this.M,
+      legH = H - TT,
+      pw = n > 0 ? Math.min(0.42, W * 0.35) : 0;
+    // tapa
+    this.box(W, TT, D, 0, H - TT / 2, D / 2, m);
+    // lateral izquierdo (panel)
+    this.box(TT, legH, D - 0.02, -W / 2 + TT / 2, legH / 2, D / 2, m);
+    if (n > 0) {
+      // cajonera a la derecha
+      const x0 = W / 2 - pw,
+        xc = x0 + pw / 2,
+        pl = 0.06,
+        ih = legH - pl;
+      this.box(T, legH, D - 0.02, x0 + T / 2, legH / 2, D / 2, m);
+      this.box(T, legH, D - 0.02, W / 2 - T / 2, legH / 2, D / 2, m);
+      this.box(pw - 2 * T, pl, T, xc, pl / 2, D - 0.05, M.BACK);
+      this.box(pw - 2 * T, T, D - 0.02, xc, pl + T / 2, D / 2, m);
+      this.box(pw - 2 * T, ih, 0.006, xc, pl + ih / 2, 0.012, M.BACK);
+      const dh = ih / n;
+      for (let k = 0; k < n; k++)
+        this.drawer(
+          xc,
+          pl + dh * k + dh / 2,
+          pw - 2 * T - 0.004,
+          dh - 0.006,
+          D - 0.022,
+          D - 0.1,
+          m,
+        );
+    } else {
+      this.box(TT, legH, D - 0.02, W / 2 - TT / 2, legH / 2, D / 2, m);
+    }
+    // faldón trasero
+    const fx0 = -W / 2 + TT,
+      fx1 = n > 0 ? W / 2 - pw : W / 2 - TT;
+    this.box(fx1 - fx0, 0.32, T, (fx0 + fx1) / 2, legH - 0.16, 0.1, m);
+    // repisa flotante
+    const sw = Math.min(W * 0.7, 1.2),
+      sy = H + 0.62;
+    this.box(sw, TT, 0.24, -W / 2 + sw / 2 + 0.05, sy, 0.12, m);
+    const BOOKC = ["#8a3b2e", "#2f4a3a", "#c9a35a", "#3f5872", "#d8cfc0"];
+    let bx = -W / 2 + 0.12;
+    BOOKC.forEach((c, i) => {
+      const bw = 0.03 + (i % 2) * 0.012,
+        bh = 0.2 + ((i * 7) % 5) * 0.012;
+      this.box(
+        bw,
+        bh,
+        0.17,
+        bx + bw / 2,
+        sy + TT / 2 + bh / 2,
+        0.12,
+        std({ color: c, roughness: 0.7 }),
+      );
+      bx += bw + 0.004;
+    });
+    this.box(0.12, 0.12, 0.12, -W / 2 + sw - 0.1, sy + TT / 2 + 0.06, 0.12, M.CER);
+    // monitor + teclado
+    const mx = n > 0 ? -pw / 2 : 0,
+      top = H,
+      mw = Math.min(0.6, W * 0.4),
+      mh = mw * 0.5625;
+    this.box(0.2, 0.012, 0.16, mx, top + 0.006, 0.16, M.HANDLE);
+    this.box(0.04, 0.16, 0.025, mx, top + 0.09, 0.15, M.HANDLE);
+    this.box(mw, mh, 0.025, mx, top + 0.17 + mh / 2, 0.16, M.TV);
+    this.box(mw - 0.016, mh - 0.016, 0.002, mx, top + 0.17 + mh / 2, 0.1735, M.SCREEN);
+    this.box(0.42, 0.018, 0.13, mx, top + 0.009, Math.min(D - 0.1, 0.4), M.HANDLE);
+  }
+
   private placard(W: number, H: number, D: number, n: number, m: THREE.Material) {
     const T = 0.018,
       pl = 0.08,
@@ -320,7 +498,9 @@ export class FurnitureScene {
     this.box(W - 2 * T, pl, T, 0, pl / 2, D - 0.05, m);
     const cols = Math.ceil(n / 2),
       { cw, xs } = this.colsX(W, cols);
-    xs.slice(1).forEach((x) => this.box(T, H - pl - 2 * T, D - 0.02, x - cw / 2 - T / 2, pl + (H - pl) / 2, D / 2 - 0.01, I));
+    xs.slice(1).forEach((x) =>
+      this.box(T, H - pl - 2 * T, D - 0.02, x - cw / 2 - T / 2, pl + (H - pl) / 2, D / 2 - 0.01, I),
+    );
     xs.forEach((x, i) => {
       const t = i % 3;
       if (t === 0 || t === 2) {
@@ -328,14 +508,17 @@ export class FurnitureScene {
         this.cyl(0.012, cw, this.M.METAL, x, H - 0.42, D / 2, Math.PI / 2);
       }
       if (t === 0) this.box(cw, T, D - 0.03, x, pl + 0.3, D / 2, I);
-      if (t === 1) for (let y = pl + 0.36; y < H - 0.2; y += 0.36) this.box(cw, T, D - 0.03, x, y, D / 2, I);
+      if (t === 1)
+        for (let y = pl + 0.36; y < H - 0.2; y += 0.36) this.box(cw, T, D - 0.03, x, y, D / 2, I);
       if (t === 2) {
-        for (let k = 0; k < 3; k++) this.drawer(x, pl + 0.13 + k * 0.22, cw - 0.01, 0.2, D - 0.04, D - 0.1, I);
+        for (let k = 0; k < 3; k++)
+          this.drawer(x, pl + 0.13 + k * 0.22, cw - 0.01, 0.2, D - 0.04, D - 0.1, I);
         this.box(cw, T, D - 0.03, x, pl + 0.7, D / 2, I);
       }
     });
     const dw = W / n;
-    for (let i = 0; i < n; i++) this.door(-W / 2 + i * dw, pl, dw, H - pl, D, m, i % 2 === 0, (H - pl) * 0.5);
+    for (let i = 0; i < n; i++)
+      this.door(-W / 2 + i * dw, pl, dw, H - pl, D, m, i % 2 === 0, (H - pl) * 0.5);
   }
 
   private cocina(W: number, H: number, D: number, n: number, m: THREE.Material) {
@@ -354,10 +537,16 @@ export class FurnitureScene {
     this.box(0.015, 0.015, 0.16, -W * 0.22, top + 0.27, 0.15, M.STEEL);
     if (W >= 1.6) {
       this.box(0.58, 0.006, 0.5, W * 0.22, top + 0.003, D / 2, M.GLASS);
-      [[-0.13, -0.1], [0.13, -0.1], [-0.13, 0.12], [0.13, 0.12]].forEach(([a, b]) => this.cyl(0.075, 0.002, M.RING, W * 0.22 + a, top + 0.008, D / 2 + b));
+      [
+        [-0.13, -0.1],
+        [0.13, -0.1],
+        [-0.13, 0.12],
+        [0.13, 0.12],
+      ].forEach(([a, b]) => this.cyl(0.075, 0.002, M.RING, W * 0.22 + a, top + 0.008, D / 2 + b));
     }
     const dw = W / n;
-    for (let i = 0; i < n; i++) this.door(-W / 2 + i * dw, pl, dw, bh, D - 0.02, m, i % 2 === 0, bh - 0.08);
+    for (let i = 0; i < n; i++)
+      this.door(-W / 2 + i * dw, pl, dw, bh, D - 0.02, m, i % 2 === 0, bh - 0.08);
     this.box(W - 2 * T, T, D - 0.06, 0, pl + bh / 2, D / 2 - 0.02, M.INT);
     if (H >= 2) {
       const y0 = 1.45,
@@ -375,7 +564,9 @@ export class FurnitureScene {
     this.box(W - 2 * T, H - 2 * T, 0.008, 0, H / 2, 0.006, m);
     const { cw, xs } = this.colsX(W, n),
       low = 0.72;
-    xs.slice(1).forEach((x) => this.box(T, H - 2 * T, D - 0.01, x - cw / 2 - T / 2, H / 2, D / 2, m));
+    xs.slice(1).forEach((x) =>
+      this.box(T, H - 2 * T, D - 0.01, x - cw / 2 - T / 2, H / 2, D / 2, m),
+    );
     xs.forEach((x) => this.box(cw, T, D - 0.01, x, low, D / 2, m));
     const top = H - T,
       cnt = Math.max(1, Math.round((top - low) / 0.36)),
@@ -385,7 +576,16 @@ export class FurnitureScene {
       r = (r * 16807) % 2147483647;
       return r / 2147483647;
     };
-    const BOOKC = ["#8a3b2e", "#2f4a3a", "#c9a35a", "#3f5872", "#d8cfc0", "#6b4e3a", "#a65f3c", "#4a4a48"];
+    const BOOKC = [
+      "#8a3b2e",
+      "#2f4a3a",
+      "#c9a35a",
+      "#3f5872",
+      "#d8cfc0",
+      "#6b4e3a",
+      "#a65f3c",
+      "#4a4a48",
+    ];
     const bm = BOOKC.map((c) => std({ color: c, roughness: 0.7 }));
     xs.forEach((x, ci) => {
       for (let k = 1; k < cnt; k++) this.box(cw, T, D - 0.01, x, low + k * step, D / 2, m);
@@ -415,14 +615,16 @@ export class FurnitureScene {
       gap = 0.016,
       cnt = Math.floor((W + gap) / (sw + gap)),
       tot = cnt * sw + (cnt - 1) * gap;
-    for (let i = 0; i < cnt; i++) this.box(sw, H, 0.02, -tot / 2 + sw / 2 + i * (sw + gap), H / 2, 0.012, m);
+    for (let i = 0; i < cnt; i++)
+      this.box(sw, H, 0.02, -tot / 2 + sw / 2 + i * (sw + gap), H / 2, 0.012, m);
     this.box(tot, H, 0.008, 0, H / 2, 0.002, M.SLATBACK);
     const y0 = 0.2,
       bh = 0.42;
     this.carcass(W, bh, D, y0, m);
     this.box(W - 2 * T, T, D - 0.04, 0, y0 + bh / 2, D / 2, M.INT);
     const dw = W / n;
-    for (let i = 0; i < n; i++) this.door(-W / 2 + i * dw, y0, dw, bh, D, m, i % 2 === 0, bh - 0.07);
+    for (let i = 0; i < n; i++)
+      this.door(-W / 2 + i * dw, y0, dw, bh, D, m, i % 2 === 0, bh - 0.07);
     const tw = Math.min(1.45, W * 0.55),
       th = tw * 0.5625,
       ty = Math.min(H - th / 2 - 0.1, y0 + bh + 0.32 + th / 2);
@@ -462,8 +664,15 @@ export class FurnitureScene {
     this.clear();
     const s = this.st,
       m = this.mats[s.m];
-    const args: [number, number, number, number, THREE.Material] = [s.W / 100, s.H / 100, s.D / 100, s.n, m];
-    if (s.k === "placard") this.placard(...args);
+    const args: [number, number, number, number, THREE.Material] = [
+      s.W / 100,
+      s.H / 100,
+      s.D / 100,
+      s.n,
+      m,
+    ];
+    if (s.k === "escritorio") this.escritorio(...args);
+    else if (s.k === "placard") this.placard(...args);
     else if (s.k === "cocina") this.cocina(...args);
     else if (s.k === "biblio") this.biblio(...args);
     else if (s.k === "rack") this.rack(...args);
@@ -515,7 +724,11 @@ export class FurnitureScene {
       this.applyOpen();
     }
     const c = Math.cos(this.pitch);
-    this.cam.position.set(this.tgt.x + this.dist * c * Math.sin(this.yaw), this.tgt.y + this.dist * Math.sin(this.pitch), this.tgt.z + this.dist * c * Math.cos(this.yaw));
+    this.cam.position.set(
+      this.tgt.x + this.dist * c * Math.sin(this.yaw),
+      this.tgt.y + this.dist * Math.sin(this.pitch),
+      this.tgt.z + this.dist * c * Math.cos(this.yaw),
+    );
     this.cam.lookAt(this.tgt);
     this.R.render(this.scene, this.cam);
   };
@@ -528,7 +741,11 @@ export class FurnitureScene {
   private onMove = (e: PointerEvent) => {
     if (!this.drag) return;
     this.yawT = Math.max(-1.25, Math.min(1.25, this.drag.yaw - (e.clientX - this.drag.x) * 0.008));
-    if (e.pointerType === "mouse") this.pitchT = Math.max(-0.05, Math.min(0.6, this.drag.pitch + (e.clientY - this.drag.y) * 0.005));
+    if (e.pointerType === "mouse")
+      this.pitchT = Math.max(
+        -0.05,
+        Math.min(0.6, this.drag.pitch + (e.clientY - this.drag.y) * 0.005),
+      );
     this.front = false;
   };
   private onUp = () => {

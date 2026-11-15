@@ -77,21 +77,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Design.gr | Muebles a medida en La Plata, CABA y AMBA" },
+      { title: "Design.gr | Escritorios y muebles a medida en La Plata, CABA y AMBA" },
       {
         name: "description",
         content:
-          "Carpintería de muebles a medida en La Plata. Cocinas, placards, vestidores, escritorios, bibliotecas y muebles de baño. Diseño integral y trabajos en CABA y AMBA.",
+          "Especialistas en escritorios a medida en La Plata. También cocinas, placards, vestidores, bibliotecas y muebles de baño. Diseño integral y trabajos en CABA y AMBA.",
       },
       { name: "author", content: "Design.gr" },
       {
         property: "og:title",
-        content: "Design.gr | Muebles a medida en La Plata, CABA y AMBA",
+        content: "Design.gr | Escritorios y muebles a medida en La Plata, CABA y AMBA",
       },
       {
         property: "og:description",
         content:
-          "Carpintería de muebles a medida en La Plata. Cocinas, placards, vestidores, escritorios, bibliotecas y muebles de baño.",
+          "Especialistas en escritorios a medida en La Plata. También cocinas, placards, vestidores, bibliotecas y muebles de baño.",
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Design.gr" },
@@ -115,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "LocalBusiness",
           name: "Design.gr",
           description:
-            "Carpintería de muebles a medida en La Plata. Cocinas, placards, vestidores, escritorios, bibliotecas y muebles de baño.",
+            "Especialistas en escritorios a medida en La Plata. También cocinas, placards, vestidores, bibliotecas y muebles de baño.",
           url: "/",
           telephone: "+541164321329",
           address: {
