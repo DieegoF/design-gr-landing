@@ -42,7 +42,7 @@ export const Route = createFileRoute("/api/diseno")({
         const id = nuevoId();
         try {
           await put(`d/${id}.jpg`, new Blob([bytes], { type: "image/jpeg" }), {
-            access: "public",
+            access: "private",
             contentType: "image/jpeg",
             addRandomSuffix: false,
             cacheControlMaxAge: 60 * 60 * 24 * 365,

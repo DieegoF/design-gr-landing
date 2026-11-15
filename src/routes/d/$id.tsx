@@ -1,5 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestUrl } from "@tanstack/react-start/server";
 import { head } from "@vercel/blob";
 import { MessageCircle } from "lucide-react";
 
@@ -10,8 +11,10 @@ const getDiseno = createServerFn({ method: "GET" })
   })
   .handler(async ({ data: id }) => {
     try {
-      const b = await head(`d/${id}.jpg`);
-      return { url: b.url };
+      await head(`d/${id}.jpg`);
+      // El store es privado: la imagen sale por /img/<id>.jpg de esta misma web.
+      const origin = getRequestUrl({ xForwardedHost: true }).origin;
+      return { url: `${origin}/img/${id}.jpg` };
     } catch {
       return null;
     }
