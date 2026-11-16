@@ -45,12 +45,12 @@ export function Hero() {
     >
       <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.2fr_1fr]">
         <div className={cn("fade-in", isInView && "fade-in-visible")}>
-          <p className="mb-4 text-sm font-medium uppercase tracking-widest text-accent">
-            Especialistas en escritorios a medida · La Plata, CABA y AMBA
-          </p>
-          <h1 className="font-display text-5xl font-medium tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-            ¿Qué mueble <em className="text-accent">necesitás?</em>
+          <h1 className="mb-4 text-sm font-medium uppercase tracking-widest text-accent">
+            Muebles y escritorios a medida en La Plata, CABA y AMBA
           </h1>
+          <p className="font-display text-5xl font-medium tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+            ¿Qué mueble <em className="text-accent">necesitás?</em>
+          </p>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
             Elegí uno, armalo en 3D con tus medidas y el material, y mandanos el pedido de
             presupuesto listo por WhatsApp.
@@ -115,9 +115,10 @@ export function Hero() {
           <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted">
             <img
               src="/images/hero.jpeg"
-              alt="Mueble TV con panel de listones en madera"
+              alt="Mueble de TV a medida con panel de listones de madera, hecho por Design.gr en La Plata"
               width={1200}
-              height={800}
+              height={1600}
+              fetchPriority="high"
               className="size-full object-cover"
               loading="eager"
             />

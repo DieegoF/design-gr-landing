@@ -56,6 +56,11 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-border/40 pt-8 text-center">
+          <p className="mx-auto mb-3 max-w-3xl text-sm text-muted-foreground">
+            Carpintería de muebles a medida en La Plata: escritorios, cocinas, placards, vestidores,
+            bibliotecas, muebles de baño y de TV. Diseño, fabricación e instalación en La Plata,
+            CABA y AMBA.
+          </p>
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Design.gr. Todos los derechos reservados.
           </p>
