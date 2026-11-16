@@ -114,8 +114,8 @@ export function Hero() {
         >
           <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted">
             <img
-              src="/images/hero.jpeg"
-              alt="Mueble de TV a medida con panel de listones de madera, hecho por Design.gr en La Plata"
+              src="/images/escritorio-1.jpeg"
+              alt="Escritorio a medida en melamina blanca con cajonera de 4 cajones y columna con estantes, hecho por Design.gr"
               width={1200}
               height={1600}
               fetchPriority="high"

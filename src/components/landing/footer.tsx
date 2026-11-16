@@ -64,6 +64,17 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Design.gr. Todos los derechos reservados.
           </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Desarrollado por{" "}
+            <a
+              href="https://diegodev.com.ar"
+              target="_blank"
+              rel="noopener"
+              className="font-semibold text-foreground underline-offset-4 hover:text-accent hover:underline"
+            >
+              diegodev
+            </a>
+          </p>
         </div>
       </div>
     </footer>

@@ -41,7 +41,7 @@ const jsonLd = {
       name: SITE_NAME,
       description: SITE_DESCRIPTION,
       url: `${SITE_URL}/`,
-      image: [OG_IMAGE, `${SITE_URL}/images/hero.jpeg`, `${SITE_URL}/images/about.jpeg`],
+      image: [OG_IMAGE, `${SITE_URL}/images/escritorio-1.jpeg`, `${SITE_URL}/images/about.jpeg`],
       telephone: PHONE,
       address: {
         "@type": "PostalAddress",
