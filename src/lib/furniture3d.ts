@@ -2,7 +2,14 @@
 // Se carga solo en el navegador (three.js) desde el componente Configurator.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as THREE from "three";
-import { agrupar, resumenPlacas, type Ficha, type Pieza } from "./despiece";
+import {
+  agrupar,
+  despieceEscritorio,
+  hoy,
+  resumenPlacas,
+  type Ficha,
+  type Pieza,
+} from "./despiece";
 
 export type FurnitureKind = "escritorio" | "placard" | "cocina" | "biblio" | "rack" | "vanit";
 
@@ -256,6 +263,14 @@ export class FurnitureScene {
   st: FurnitureState = { k: "escritorio", ...ESCRITORIO_DEF } as FurnitureState;
   open = 0;
   openT = 0;
+  /** Vista explotada: 0 = armado, 1 = piezas separadas. */
+  explode = 0;
+  explodeT = 0;
+  private parts: { o: THREE.Object3D; base: THREE.Vector3; off: THREE.Vector3; decor: boolean }[] =
+    [];
+  /** Encuadre de cámara armado (A) y explotado (B). */
+  private fitA = { d: 4, c: new THREE.Vector3() };
+  private fitB = { d: 4, c: new THREE.Vector3() };
   person = false;
   front = false;
   touched = false;
@@ -331,7 +346,6 @@ export class FurnitureScene {
       INT: std({ color: "#ece7df", roughness: 0.7 }),
       BACK: std({ color: "#ddd6cb", roughness: 0.8 }),
       METAL: std({ color: "#9aa0a3", metalness: 0.85, roughness: 0.3 }),
-      HANDLE: std({ color: "#1c1c1c", metalness: 0.5, roughness: 0.4 }),
       COUNTER: std({ color: "#3b3c3d", roughness: 0.35 }),
       STEEL: std({ color: "#c5c9cc", metalness: 0.9, roughness: 0.25 }),
       GLASS: std({ color: "#111111", roughness: 0.15 }),
@@ -414,7 +428,16 @@ export class FurnitureScene {
 
   toggleOpen() {
     this.openT = this.openT ? 0 : 1;
+    if (this.openT) this.explodeT = 0;
     return !!this.openT;
+  }
+
+  /** Separa el mueble pieza por pieza (o lo vuelve a armar). */
+  toggleExplode() {
+    this.explodeT = this.explodeT ? 0 : 1;
+    if (this.explodeT) this.openT = 0;
+    this.touched = true;
+    return !!this.explodeT;
   }
 
   togglePerson() {
@@ -432,7 +455,13 @@ export class FurnitureScene {
   }
 
   snapshot() {
+    // la imagen del pedido siempre sale con el mueble armado
+    const ex = this.explode;
+    this.explode = 0;
+    this.applyPose();
     this.R.render(this.scene, this.cam);
+    this.explode = ex;
+    this.applyPose();
     return this.canvas.toDataURL("image/jpeg", 0.85);
   }
 
@@ -441,6 +470,25 @@ export class FurnitureScene {
    * Incluye piezas de 18 mm, fondos de 3 mm, cajas de cajón, cantos y herrajes.
    */
   despiece(mueble: string, config: string): Ficha {
+    const s = this.st;
+    if (s.k === "escritorio")
+      return despieceEscritorio(
+        {
+          W: s.W,
+          H: s.H,
+          D: s.D,
+          n: s.n,
+          e: s.e,
+          r: s.r ?? 0,
+          izq: s.izq ?? "cajonera",
+          der: s.der ?? "estantes",
+          modulo: MODULO_CM,
+          m: s.m,
+          mt: s.mt ?? "",
+          mf: s.mf ?? "",
+        },
+        config,
+      );
     const T = ESPESOR_MM / 1000;
     const nombreMat = new Map<THREE.Material, string>(
       Object.entries(this.mats).map(([k, v]) => [v, k]),
@@ -453,7 +501,6 @@ export class FurnitureScene {
     let canto = 0;
     let cajones = 0;
     let bisagras = 0;
-    let puertas = 0;
     const add = (
       pieza: string,
       material: string,
@@ -516,7 +563,6 @@ export class FurnitureScene {
 
       if (ud.pieza === "Puerta" || ud.pieza === "Frente de cajón") {
         if (ud.pieza === "Puerta") {
-          puertas++;
           bisagras += h < 0.9 ? 2 : h < 1.6 ? 3 : 4;
         }
         add(ud.pieza, material, esp, w, h, 2 * (mm(w) + mm(h)));
@@ -552,6 +598,7 @@ export class FurnitureScene {
     return {
       v: 1,
       mueble,
+      fecha: hoy(),
       config,
       piezas: grupos,
       cantoM: Math.round(canto / 100) / 10,
@@ -559,7 +606,6 @@ export class FurnitureScene {
       herrajes: [
         { nombre: "Correderas (par por cajón)", cant: cajones },
         { nombre: "Bisagras", cant: bisagras },
-        { nombre: "Tiradores", cant: puertas + cajones },
       ].filter((x) => x.cant > 0),
     };
   }
@@ -597,7 +643,6 @@ export class FurnitureScene {
     z: number,
     m: THREE.Material,
     left: boolean,
-    handleY: number,
   ) {
     const T = ESPESOR_MM / 1000;
     const p = new THREE.Group();
@@ -605,8 +650,6 @@ export class FurnitureScene {
     this.G.add(p);
     const dx = left ? 1 : -1;
     this.box(w - 0.004, h - 0.004, T, (dx * w) / 2, h / 2, T / 2, m, p).userData.pieza = "Puerta";
-    const hh = Math.min(0.22, h * 0.45);
-    this.box(0.012, hh, 0.018, dx * (w - 0.035), handleY, T + 0.012, this.M.HANDLE, p);
     this.doors.push({ p, s: left ? -1 : 1 });
   }
   private drawer(
@@ -625,7 +668,6 @@ export class FurnitureScene {
     this.box(w, h, T, 0, 0, 0, m, g).userData.pieza = "Frente de cajón";
     // la caja del cajón se dibuja como un bloque; en el despiece se abre en sus piezas
     this.box(w - 0.04, h * 0.7, d, 0, -h * 0.1, -d / 2, this.M.INT, g).userData.cajon = true;
-    this.box(0.18, 0.012, 0.018, 0, h * 0.25, T / 2 + 0.01, this.M.HANDLE, g);
     this.drawers.push({ g, z0: z, dz: Math.min(0.35, d * 0.8) });
   }
   private carcass(W: number, H: number, D: number, y0: number, m: THREE.Material, back = true) {
@@ -788,8 +830,7 @@ export class FurnitureScene {
       }
     });
     const dw = W / n;
-    for (let i = 0; i < n; i++)
-      this.door(-W / 2 + i * dw, pl, dw, H - pl, D, this.FM, i % 2 === 0, (H - pl) * 0.5);
+    for (let i = 0; i < n; i++) this.door(-W / 2 + i * dw, pl, dw, H - pl, D, this.FM, i % 2 === 0);
   }
 
   private cocina(W: number, H: number, D: number, n: number, m: THREE.Material, e: number) {
@@ -817,7 +858,7 @@ export class FurnitureScene {
     }
     const dw = W / n;
     for (let i = 0; i < n; i++)
-      this.door(-W / 2 + i * dw, pl, dw, bh, D - 0.02, this.FM, i % 2 === 0, bh - 0.08);
+      this.door(-W / 2 + i * dw, pl, dw, bh, D - 0.02, this.FM, i % 2 === 0);
     for (let k = 1; k <= e; k++)
       this.box(W - 2 * T, T, D - 0.06, 0, pl + (bh * k) / (e + 1), D / 2 - 0.02, M.INT);
     if (H >= 2) {
@@ -827,8 +868,7 @@ export class FurnitureScene {
       this.carcass(W, uh, ud, y0, m);
       for (let k = 1; k <= e; k++)
         this.box(W - 2 * T, T, ud - 0.02, 0, y0 + (uh * k) / (e + 1), ud / 2, M.INT);
-      for (let i = 0; i < n; i++)
-        this.door(-W / 2 + i * dw, y0, dw, uh, ud, this.FM, i % 2 === 0, 0.08);
+      for (let i = 0; i < n; i++) this.door(-W / 2 + i * dw, y0, dw, uh, ud, this.FM, i % 2 === 0);
     }
   }
 
@@ -879,9 +919,7 @@ export class FurnitureScene {
         }
       }
     });
-    xs.forEach((x, i) =>
-      this.door(x - cw / 2, T, cw, low - T, D, this.FM, i % 2 === 0, low * 0.75),
-    );
+    xs.forEach((x, i) => this.door(x - cw / 2, T, cw, low - T, D, this.FM, i % 2 === 0));
   }
 
   private rack(W: number, H: number, D: number, n: number, m: THREE.Material, e: number) {
@@ -900,8 +938,7 @@ export class FurnitureScene {
     this.carcass(W, bh, D, y0, m);
     this.box(W - 2 * T, T, D - 0.04, 0, y0 + bh / 2, D / 2, M.INT);
     const dw = W / n;
-    for (let i = 0; i < n; i++)
-      this.door(-W / 2 + i * dw, y0, dw, bh, D, this.FM, i % 2 === 0, bh - 0.07);
+    for (let i = 0; i < n; i++) this.door(-W / 2 + i * dw, y0, dw, bh, D, this.FM, i % 2 === 0);
     const tw = Math.min(1.45, W * 0.55),
       th = tw * 0.5625,
       ty = Math.min(H - th / 2 - 0.1, y0 + bh + 0.32 + th / 2);
@@ -944,8 +981,7 @@ export class FurnitureScene {
     this.box(0.016, 0.016, 0.12, 0, top + 0.24, 0.1, M.STEEL);
     this.box(Math.min(W, 0.9), 0.75, 0.012, 0, top + 0.32 + 0.375, 0.008, M.MIRROR);
     const dw = W / n;
-    for (let i = 0; i < n; i++)
-      this.door(-W / 2 + i * dw, y0, dw, H, D, this.FM, i % 2 === 0, H - 0.07);
+    for (let i = 0; i < n; i++) this.door(-W / 2 + i * dw, y0, dw, H, D, this.FM, i % 2 === 0);
   }
 
   private clear() {
@@ -955,6 +991,49 @@ export class FurnitureScene {
     }
     this.doors = [];
     this.drawers = [];
+    this.parts = [];
+  }
+
+  /** ¿El objeto tiene al menos una pieza de placa? (si no, es decoración: libros, notebook, mesada…) */
+  private esPieza(o: THREE.Object3D) {
+    const piezas = new Set<THREE.Material>([...Object.values(this.mats), this.M.INT, this.M.BACK]);
+    let si = false;
+    o.traverse((c) => {
+      if (c instanceof THREE.Mesh && piezas.has(c.material as THREE.Material)) si = true;
+    });
+    return si;
+  }
+
+  /** Calcula hacia dónde se mueve cada pieza en la vista explotada. */
+  private prepararExplosion() {
+    const piezas = this.G.children.filter((c) => this.esPieza(c));
+    const caja = new THREE.Box3();
+    piezas.forEach((c) => caja.expandByObject(c));
+    const centro = caja.getCenter(new THREE.Vector3());
+    const tam = caja.getSize(new THREE.Vector3());
+    const k = 0.85;
+    this.G.children.forEach((o) => {
+      const decor = !piezas.includes(o);
+      const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()).sub(centro);
+      // separación proporcional a la distancia al centro, con un mínimo para que todo se despegue
+      const off = new THREE.Vector3(
+        c.x * k + Math.sign(c.x) * 0.04,
+        c.y * k + Math.sign(c.y || 1) * 0.04,
+        c.z * k * 0.6 + (c.z >= 0 ? 1 : -1) * Math.max(0.04, tam.z * 0.1),
+      );
+      this.parts.push({ o, base: o.position.clone(), off, decor });
+    });
+    // el frente de cada cajón también se separa de su caja
+    this.drawers.forEach(({ g }) => {
+      const frente = g.children.find((c) => c.userData.pieza === "Frente de cajón");
+      if (frente)
+        this.parts.push({
+          o: frente,
+          base: frente.position.clone(),
+          off: new THREE.Vector3(0, 0, 0.14),
+          decor: false,
+        });
+    });
   }
 
   build() {
@@ -976,25 +1055,55 @@ export class FurnitureScene {
     else if (s.k === "biblio") this.biblio(...args);
     else if (s.k === "rack") this.rack(...args);
     else this.vanit(...args);
-    this.applyOpen();
+    this.prepararExplosion();
+    this.applyPose();
     this.P.position.set(s.W / 200 + 0.5, 0, Math.max(s.D / 100, 0.45) + 0.15);
     this.P.visible = this.person;
-    const bx = new THREE.Box3().setFromObject(this.G);
-    if (this.person) bx.expandByObject(this.P);
-    const sz = bx.getSize(new THREE.Vector3());
-    bx.getCenter(this.tgtT);
-    const half = Math.max(sz.y / 2, sz.x / 2 / this.cam.aspect) * 1.3;
-    this.distT = half / Math.tan(THREE.MathUtils.degToRad(this.cam.fov / 2)) + sz.z * 0.6;
+    // encuadre con el mueble armado y con las piezas separadas
+    const ex = this.explode;
+    let sz = new THREE.Vector3();
+    for (const [e, fit] of [
+      [1, this.fitB],
+      [0, this.fitA],
+    ] as const) {
+      this.explode = e;
+      this.applyPose();
+      const bx = new THREE.Box3();
+      this.parts.forEach((p) => {
+        if (!(e && p.decor)) bx.expandByObject(p.o);
+      });
+      if (this.person) bx.expandByObject(this.P);
+      sz = bx.getSize(new THREE.Vector3());
+      bx.getCenter(fit.c);
+      const half = Math.max(sz.y / 2, sz.x / 2 / this.cam.aspect) * (e ? 1.15 : 1.3);
+      fit.d = half / Math.tan(THREE.MathUtils.degToRad(this.cam.fov / 2)) + sz.z * 0.6;
+    }
+    this.explode = ex;
+    this.applyPose();
+    this.encuadre();
     const sc = this.sun.shadow.camera as THREE.OrthographicCamera;
     sc.left = -Math.max(4, sz.x);
     sc.right = Math.max(4, sz.x);
     sc.updateProjectionMatrix();
   }
 
-  private applyOpen() {
+  /** Objetivo de cámara según si está armado o explotado. */
+  private encuadre() {
+    const t = this.explodeT;
+    this.distT = this.fitA.d + (this.fitB.d - this.fitA.d) * t;
+    this.tgtT.copy(this.fitA.c).lerp(this.fitB.c, t);
+  }
+
+  /** Aplica apertura de puertas/cajones y separación de piezas. */
+  private applyPose() {
+    const ex = this.explode;
+    this.parts.forEach((p) => {
+      p.o.position.copy(p.base).addScaledVector(p.off, ex);
+      if (p.decor) p.o.visible = ex < 0.05;
+    });
     const a = this.open * 1.55;
     this.doors.forEach((d) => (d.p.rotation.y = d.s * a));
-    this.drawers.forEach((d) => (d.g.position.z = d.z0 + this.open * d.dz));
+    this.drawers.forEach((d) => (d.g.position.z += this.open * d.dz));
   }
 
   private resize() {
@@ -1018,10 +1127,11 @@ export class FurnitureScene {
     this.pitch += (this.pitchT - this.pitch) * k;
     this.dist += (this.distT * this.zoom - this.dist) * k;
     this.tgt.lerp(this.tgtT, k);
-    if (Math.abs(this.openT - this.open) > 0.001) {
-      this.open += (this.openT - this.open) * 0.12;
-      this.applyOpen();
-    }
+    const exMoving = Math.abs(this.explodeT - this.explode) > 0.001;
+    if (exMoving) this.explode += (this.explodeT - this.explode) * 0.1;
+    if (Math.abs(this.openT - this.open) > 0.001) this.open += (this.openT - this.open) * 0.12;
+    if (exMoving || Math.abs(this.openT - this.open) > 0.0005) this.applyPose();
+    this.encuadre();
     const c = Math.cos(this.pitch);
     this.cam.position.set(
       this.tgt.x + this.dist * c * Math.sin(this.yaw),

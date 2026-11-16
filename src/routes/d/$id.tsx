@@ -2,7 +2,8 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestUrl } from "@tanstack/react-start/server";
 import { get, head } from "@vercel/blob";
-import { MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { Download, LoaderCircle, MessageCircle } from "lucide-react";
 import { SITE_URL } from "@/lib/site";
 import { DESPERDICIO, PLACA_MM, entraEnPlaca, fichaSchema, type Ficha } from "@/lib/despiece";
 
@@ -82,6 +83,7 @@ export const Route = createFileRoute("/d/$id")({
 
 function Diseno() {
   const { url, foto, ficha } = Route.useLoaderData();
+  const { id } = Route.useParams();
   const t = foto ? TXT.foto : TXT.diseno;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-5 bg-background px-4 py-10">
@@ -93,7 +95,7 @@ function Diseno() {
         className="w-full max-w-2xl rounded-2xl border border-border/60 shadow-sm"
       />
       <p className="max-w-md text-center text-sm text-muted-foreground">{t.nota}</p>
-      {ficha && <FichaTaller f={ficha} />}
+      {ficha && <FichaTaller f={ficha} img={url} id={id} />}
       <a
         href="/#armalo"
         className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
@@ -107,13 +109,41 @@ function Diseno() {
 const mmTxt = (n: number) => n.toLocaleString("es-AR");
 
 /** Despiece estimado para el taller: piezas, placas, cantos y herrajes. */
-function FichaTaller({ f }: { f: Ficha }) {
+function FichaTaller({ f, img, id }: { f: Ficha; img: string; id: string }) {
   const total = f.piezas.reduce((s, p) => s + p.cant, 0);
+  const [generando, setGenerando] = useState(false);
+  const descargar = async () => {
+    setGenerando(true);
+    try {
+      const { descargarDespiecePdf } = await import("@/lib/despiece-pdf");
+      await descargarDespiecePdf(f, img, id);
+    } catch (e) {
+      console.error(e);
+      alert("No se pudo generar el PDF. Probá de nuevo.");
+    } finally {
+      setGenerando(false);
+    }
+  };
   const grandes = f.piezas.some((p) => !entraEnPlaca(p));
   return (
     <section className="w-full max-w-3xl rounded-2xl border border-border/60 bg-card p-5 text-sm text-foreground sm:p-6">
       <p className="text-xs font-medium uppercase tracking-widest text-accent">Para el taller</p>
-      <h2 className="mt-1 font-display text-2xl font-medium">Despiece estimado</h2>
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-2xl font-medium">Despiece estimado</h2>
+        <button
+          type="button"
+          onClick={descargar}
+          disabled={generando}
+          className="flex items-center gap-2 rounded-xl border border-primary px-4 py-2 text-sm font-semibold text-foreground hover:bg-secondary disabled:opacity-60"
+        >
+          {generando ? (
+            <LoaderCircle className="size-4 animate-spin" />
+          ) : (
+            <Download className="size-4" />
+          )}
+          {generando ? "Generando…" : "Descargar PDF"}
+        </button>
+      </div>
       <p className="mt-2 text-muted-foreground">
         <b className="text-foreground">{f.mueble}</b>: {f.config}
       </p>

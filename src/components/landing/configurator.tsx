@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, DoorOpen, Eye, MessageSquarePlus, Minus, Plus, User } from "lucide-react";
+import { Box, Boxes, DoorOpen, Eye, MessageSquarePlus, Minus, Plus, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { scrollToSection } from "@/lib/scroll";
@@ -38,6 +38,7 @@ export function Configurator() {
     r: 0,
   });
   const [open, setOpen] = useState(false);
+  const [exploded, setExploded] = useState(false);
   const [person, setPerson] = useState(false);
   const [front, setFront] = useState(false);
   const [hint, setHint] = useState(true);
@@ -182,7 +183,19 @@ export function Configurator() {
                       ? "Abrir cajones"
                       : "Abrir puertas",
                   icon: DoorOpen,
-                  fn: () => setOpen(!!sceneRef.current?.toggleOpen()),
+                  fn: () => {
+                    setOpen(!!sceneRef.current?.toggleOpen());
+                    setExploded(false);
+                  },
+                },
+                {
+                  on: exploded,
+                  label: exploded ? "Armar" : "Ver pieza por pieza",
+                  icon: Boxes,
+                  fn: () => {
+                    setExploded(!!sceneRef.current?.toggleExplode());
+                    setOpen(false);
+                  },
                 },
                 {
                   on: front,
