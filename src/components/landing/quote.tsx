@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { OTRO, TIPOS, WHATSAPP, armarMensaje, medidasTexto, useQuote } from "./quote-context";
+import type { Ficha } from "@/lib/despiece";
 
 const MATERIALES = ["Melamina", "MDF", "No sé, que me asesoren"];
 const ZONAS = ["La Plata", "CABA", "AMBA (otra zona)"];
@@ -25,20 +26,31 @@ type FotoRef = { id: number; preview: string; estado: Estado; link: string; p: P
 
 const MAX_REFS = 3;
 
-/** Sube un JPEG y devuelve el link corto (/d/xxxx) que va en el mensaje. */
-async function subirImagen(blob: Blob, foto = false): Promise<string> {
+/**
+ * Sube un JPEG y devuelve el link corto (/d/xxxx) que va en el mensaje.
+ * Si viene `ficha` (despiece del 3D), se manda junto con la imagen en un formulario.
+ */
+async function subirImagen(blob: Blob, foto = false, ficha?: Ficha | null): Promise<string> {
+  let body: BodyInit = blob;
+  const headers: HeadersInit = {};
+  if (ficha) {
+    const fd = new FormData();
+    fd.append("img", new File([blob], "diseno.jpg", { type: "image/jpeg" }));
+    fd.append("ficha", JSON.stringify(ficha));
+    body = fd;
+  } else headers["Content-Type"] = "image/jpeg";
   const r = await fetch(`/api/diseno${foto ? "?tipo=foto" : ""}`, {
     method: "POST",
-    headers: { "Content-Type": "image/jpeg" },
-    body: blob,
+    headers,
+    body,
   });
   if (!r.ok) throw new Error(`subida ${r.status}`);
   const { id } = (await r.json()) as { id: string };
   return `${window.location.origin}/d/${id}`;
 }
 
-async function subirDiseno(dataUrl: string): Promise<string> {
-  return subirImagen(await (await fetch(dataUrl)).blob());
+async function subirDiseno(dataUrl: string, ficha: Ficha | null): Promise<string> {
+  return subirImagen(await (await fetch(dataUrl)).blob(), false, ficha);
 }
 
 /** Achica la foto del celu (hasta 1600 px) y la pasa a JPEG para que suba rápido. */
@@ -137,7 +149,7 @@ export function Quote() {
     let vivo = true;
     const img = q.img;
     setSubida({ img, estado: "subiendo", link: "" });
-    subidaRef.current = subirDiseno(img).then(
+    subidaRef.current = subirDiseno(img, q.ficha).then(
       (link) => {
         if (vivo) setSubida({ img, estado: "listo", link });
         return link;
@@ -151,6 +163,8 @@ export function Quote() {
     return () => {
       vivo = false;
     };
+    // la ficha se carga junto con la imagen (botón "Usar este diseño")
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q.img]);
 
   const link = subida?.estado === "listo" ? subida.link : "";
@@ -236,7 +250,7 @@ export function Quote() {
               <Chips
                 value={q.tipo}
                 options={TIPOS}
-                onChange={(v) => update({ tipo: v, ref: "", config: "", img: "" })}
+                onChange={(v) => update({ tipo: v, ref: "", config: "", img: "", ficha: null })}
               />
               {esOtro && (
                 <label className="mt-3 block">

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import type { FurnitureKind, FurnitureState } from "@/lib/furniture3d";
+import { resumenFicha, type Ficha } from "@/lib/despiece";
 
 export const WHATSAPP = "541164321329";
 
@@ -31,6 +32,8 @@ export interface QuoteState {
   ref: string;
   config: string;
   img: string;
+  /** Despiece estimado del diseño 3D (viaja junto con la imagen al link del diseño). */
+  ficha: Ficha | null;
   material: string;
   zona: string;
   plazo: string;
@@ -50,6 +53,7 @@ const empty: QuoteState = {
   ref: "",
   config: "",
   img: "",
+  ficha: null,
   material: "",
   zona: "",
   plazo: "",
@@ -133,6 +137,10 @@ export function armarMensaje(q: QuoteState, link = "", fotosRef: string[] = [], 
   if (q.ref) L.push(`• Me gusta este trabajo: "${q.ref}"`);
   if (q.config) L.push(`• Lo armé en el 3D: ${q.config}`);
   if (link) L.push(`• Mi diseño 3D: ${link}`);
+  if (q.config && q.ficha)
+    L.push(
+      `• Despiece estimado: ${resumenFicha(q.ficha)}${link ? " (detalle en el link del diseño)" : ""}`,
+    );
   const m = medidasTexto(q);
   if (m) L.push(`• Medidas: ${m}`);
   if (q.material)
