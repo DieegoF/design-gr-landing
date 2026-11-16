@@ -1014,11 +1014,14 @@ export class FurnitureScene {
     const k = 0.85;
     this.G.children.forEach((o) => {
       const decor = !piezas.includes(o);
-      const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()).sub(centro);
+      const bo = new THREE.Box3().setFromObject(o);
+      const c = bo.getCenter(new THREE.Vector3()).sub(centro);
+      // altura desde el piso: en vertical todo se separa hacia arriba, así nada queda bajo el piso
+      const alto = bo.getCenter(new THREE.Vector3()).y - caja.min.y;
       // separación proporcional a la distancia al centro, con un mínimo para que todo se despegue
       const off = new THREE.Vector3(
         c.x * k + Math.sign(c.x) * 0.04,
-        c.y * k + Math.sign(c.y || 1) * 0.04,
+        alto * k + (alto > 0.03 ? 0.04 : 0.01),
         c.z * k * 0.6 + (c.z >= 0 ? 1 : -1) * Math.max(0.04, tam.z * 0.1),
       );
       this.parts.push({ o, base: o.position.clone(), off, decor });
