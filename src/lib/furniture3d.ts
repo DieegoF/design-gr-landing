@@ -2,6 +2,7 @@
 // Se carga solo en el navegador (three.js) desde el componente Configurator.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as THREE from "three";
+import { agrupar, resumenPlacas, type Ficha, type Pieza } from "./despiece";
 
 export type FurnitureKind = "escritorio" | "placard" | "cocina" | "biblio" | "rack" | "vanit";
 
@@ -111,6 +112,8 @@ export const MATERIALS: Record<string, MaterialDef> = {
     grp: "Melamina",
     css: "linear-gradient(90deg,#7a5234,#5a3a24,#7d5638,#4f331f)",
   },
+  "Melamina gris claro": { grp: "Melamina", css: "#b9b6b0" },
+  "Melamina negra": { grp: "Melamina", css: "#262626" },
   "MDF laqueado blanco": { grp: "MDF", css: "#f7f6f2" },
   "MDF laqueado negro mate": { grp: "MDF", css: "#1f1f1f" },
 };
@@ -133,6 +136,8 @@ export interface FurnitureState {
   der?: LadoEscritorio;
   /** Material de la tapa ("" = igual al cuerpo). */
   mt?: string;
+  /** Material de puertas y frentes de cajón ("" = igual al cuerpo). Sirve para todos los muebles. */
+  mf?: string;
   /** Repisas en la pared sobre el escritorio. */
   r?: number;
 }
@@ -161,6 +166,7 @@ export const ESCRITORIO_DEF: Partial<FurnitureState> = {
   izq: "cajonera",
   der: "estantes",
   mt: "",
+  mf: "",
   r: 0,
 };
 
@@ -235,6 +241,8 @@ export class FurnitureScene {
   private P = new THREE.Group();
   private mats: Record<string, THREE.MeshStandardMaterial> = {};
   private M: Record<string, THREE.MeshStandardMaterial>;
+  /** Material de los frentes (puertas y cajones) del mueble que se está armando. */
+  private FM!: THREE.MeshStandardMaterial;
   private doors: { p: THREE.Group; s: number }[] = [];
   private drawers: { g: THREE.Group; z0: number; dz: number }[] = [];
   private raf = 0;
@@ -314,6 +322,8 @@ export class FurnitureScene {
       "Melamina gris grafito": std({ color: "#4b4b49", roughness: 0.6 }),
       "Melamina roble": std({ map: woodTex("#c99f70", "#7d5530", 11), roughness: 0.62 }),
       "Melamina nogal": std({ map: woodTex("#78502f", "#3a2414", 23), roughness: 0.6 }),
+      "Melamina gris claro": std({ color: "#bab7b1", roughness: 0.6 }),
+      "Melamina negra": std({ color: "#272727", roughness: 0.55 }),
       "MDF laqueado blanco": std({ color: "#f8f7f3", roughness: 0.28 }),
       "MDF laqueado negro mate": std({ color: "#232323", roughness: 0.45 }),
     };
@@ -426,6 +436,134 @@ export class FurnitureScene {
     return this.canvas.toDataURL("image/jpeg", 0.85);
   }
 
+  /**
+   * Despiece estimado a partir de las piezas de la maqueta (no del mueble final).
+   * Incluye piezas de 18 mm, fondos de 3 mm, cajas de cajón, cantos y herrajes.
+   */
+  despiece(mueble: string, config: string): Ficha {
+    const T = ESPESOR_MM / 1000;
+    const nombreMat = new Map<THREE.Material, string>(
+      Object.entries(this.mats).map(([k, v]) => [v, k]),
+    );
+    // interiores (cajas de cajón, estantes de placard) en melamina blanca: comparten placa con el cuerpo blanco
+    const INTERIOR = "Melamina blanca";
+    const FONDO = "Fondo fibrofácil";
+    const mm = (v: number) => Math.round(v * 1000);
+    const piezas: Pieza[] = [];
+    let canto = 0;
+    let cajones = 0;
+    let bisagras = 0;
+    let puertas = 0;
+    const add = (
+      pieza: string,
+      material: string,
+      esp: number,
+      a: number,
+      b: number,
+      cantoMm = 0,
+    ) => {
+      piezas.push({
+        pieza,
+        material,
+        esp,
+        largo: Math.max(mm(a), mm(b)),
+        ancho: Math.min(mm(a), mm(b)),
+        cant: 1,
+      });
+      canto += cantoMm;
+    };
+
+    this.G.traverse((o) => {
+      if (!(o instanceof THREE.Mesh) || !(o.geometry instanceof THREE.BoxGeometry)) return;
+      const { width: w, height: h, depth: d } = o.geometry.parameters;
+      const mat = o.material as THREE.Material;
+      const ud = o.userData as { pieza?: string; cajon?: boolean };
+
+      if (ud.cajon) {
+        // caja del cajón: 2 laterales, frente y contrafrente interiores, piso de 3 mm
+        cajones++;
+        add("Lateral de cajón", INTERIOR, ESPESOR_MM, d, h, mm(d));
+        add("Lateral de cajón", INTERIOR, ESPESOR_MM, d, h, mm(d));
+        add(
+          "Frente interior / contrafrente de cajón",
+          INTERIOR,
+          ESPESOR_MM,
+          w - 2 * T,
+          h,
+          mm(w - 2 * T),
+        );
+        add(
+          "Frente interior / contrafrente de cajón",
+          INTERIOR,
+          ESPESOR_MM,
+          w - 2 * T,
+          h,
+          mm(w - 2 * T),
+        );
+        add("Piso de cajón", FONDO, 3, w, d);
+        return;
+      }
+
+      let material = nombreMat.get(mat);
+      if (!material) {
+        if (mat === this.M.INT) material = INTERIOR;
+        else if (mat === this.M.BACK) material = Math.min(w, h, d) < 0.012 ? FONDO : INTERIOR;
+        else return; // herrajes, mesada, libros, electrodomésticos: no son piezas de placa
+      }
+      const min = Math.min(w, h, d);
+      const fino = min < 0.012;
+      const esp = fino && material === FONDO ? 3 : ESPESOR_MM;
+
+      if (ud.pieza === "Puerta" || ud.pieza === "Frente de cajón") {
+        if (ud.pieza === "Puerta") {
+          puertas++;
+          bisagras += h < 0.9 ? 2 : h < 1.6 ? 3 : 4;
+        }
+        add(ud.pieza, material, esp, w, h, 2 * (mm(w) + mm(h)));
+        return;
+      }
+      if (ud.pieza === "Tapa del escritorio") {
+        add(ud.pieza, material, esp, w, d, 2 * (mm(w) + mm(d)));
+        return;
+      }
+      if (fino) {
+        // fondo: la cara grande es la que no es el espesor
+        const [a, b] = w === min ? [h, d] : h === min ? [w, d] : [w, h];
+        add("Fondo", material, esp, a, b);
+        return;
+      }
+      // orientación según el eje del espesor
+      if (Math.abs(w - T) < 1e-4) add("Lateral / división", material, esp, h, d, mm(h));
+      else if (Math.abs(h - T) < 1e-4) add("Piso, techo o estante", material, esp, w, d, mm(w));
+      else if (Math.abs(d - T) < 1e-4)
+        // listón vertical (panel de listones del rack) o zócalo / travesaño horizontal
+        add(
+          w < 0.06 && h > w ? "Listón" : "Zócalo / travesaño",
+          material,
+          esp,
+          w,
+          h,
+          w < 0.06 && h > w ? 0 : mm(w),
+        );
+      else add("Pieza", material, esp, Math.max(w, h, d), [w, h, d].sort((x, y) => x - y)[1]);
+    });
+
+    const grupos = agrupar(piezas);
+    return {
+      v: 1,
+      mueble,
+      config,
+      piezas: grupos,
+      cantoM: Math.round(canto / 100) / 10,
+      placas: resumenPlacas(grupos),
+      herrajes: [
+        { nombre: "Correderas (par por cajón)", cant: cajones },
+        { nombre: "Bisagras", cant: bisagras },
+        { nombre: "Tiradores", cant: puertas + cajones },
+      ].filter((x) => x.cant > 0),
+    };
+  }
+
   // ---------- construcción ----------
   private box(
     w: number,
@@ -466,7 +604,7 @@ export class FurnitureScene {
     p.position.set(left ? x0 : x0 + w, y0, z);
     this.G.add(p);
     const dx = left ? 1 : -1;
-    this.box(w - 0.004, h - 0.004, T, (dx * w) / 2, h / 2, T / 2, m, p);
+    this.box(w - 0.004, h - 0.004, T, (dx * w) / 2, h / 2, T / 2, m, p).userData.pieza = "Puerta";
     const hh = Math.min(0.22, h * 0.45);
     this.box(0.012, hh, 0.018, dx * (w - 0.035), handleY, T + 0.012, this.M.HANDLE, p);
     this.doors.push({ p, s: left ? -1 : 1 });
@@ -484,8 +622,9 @@ export class FurnitureScene {
     const g = new THREE.Group();
     g.position.set(x, y, z);
     this.G.add(g);
-    this.box(w, h, T, 0, 0, 0, m, g);
-    this.box(w - 0.04, h * 0.7, d, 0, -h * 0.1, -d / 2, this.M.INT, g);
+    this.box(w, h, T, 0, 0, 0, m, g).userData.pieza = "Frente de cajón";
+    // la caja del cajón se dibuja como un bloque; en el despiece se abre en sus piezas
+    this.box(w - 0.04, h * 0.7, d, 0, -h * 0.1, -d / 2, this.M.INT, g).userData.cajon = true;
     this.box(0.18, 0.012, 0.018, 0, h * 0.25, T / 2 + 0.01, this.M.HANDLE, g);
     this.drawers.push({ g, z0: z, dz: Math.min(0.35, d * 0.8) });
   }
@@ -516,7 +655,7 @@ export class FurnitureScene {
       izq = st.izq ?? "cajonera",
       der = st.der ?? "estantes";
     // tapa (puede ir en otro color)
-    this.box(W, T, D, 0, H - T / 2, D / 2, mt);
+    this.box(W, T, D, 0, H - T / 2, D / 2, mt).userData.pieza = "Tapa del escritorio";
 
     const BOOKC = ["#8a3b2e", "#2f4a3a", "#c9a35a", "#3f5872", "#d8cfc0"];
     const lado = (kind: LadoEscritorio, sgn: -1 | 1) => {
@@ -539,7 +678,15 @@ export class FurnitureScene {
       if (kind === "cajonera") {
         const dh = ih / n;
         for (let k = 0; k < n; k++)
-          this.drawer(xc, pl + T + dh * k + dh / 2, iw - 0.004, dh - 0.006, D - 0.022, D - 0.1, m);
+          this.drawer(
+            xc,
+            pl + T + dh * k + dh / 2,
+            iw - 0.004,
+            dh - 0.006,
+            D - 0.022,
+            D - 0.1,
+            this.FM,
+          );
       } else {
         const hs = ih / (e + 1);
         for (let k = 1; k <= e; k++) this.box(iw, T, D - 0.03, xc, pl + T + k * hs, D / 2, m);
@@ -642,7 +789,7 @@ export class FurnitureScene {
     });
     const dw = W / n;
     for (let i = 0; i < n; i++)
-      this.door(-W / 2 + i * dw, pl, dw, H - pl, D, m, i % 2 === 0, (H - pl) * 0.5);
+      this.door(-W / 2 + i * dw, pl, dw, H - pl, D, this.FM, i % 2 === 0, (H - pl) * 0.5);
   }
 
   private cocina(W: number, H: number, D: number, n: number, m: THREE.Material, e: number) {
@@ -670,7 +817,7 @@ export class FurnitureScene {
     }
     const dw = W / n;
     for (let i = 0; i < n; i++)
-      this.door(-W / 2 + i * dw, pl, dw, bh, D - 0.02, m, i % 2 === 0, bh - 0.08);
+      this.door(-W / 2 + i * dw, pl, dw, bh, D - 0.02, this.FM, i % 2 === 0, bh - 0.08);
     for (let k = 1; k <= e; k++)
       this.box(W - 2 * T, T, D - 0.06, 0, pl + (bh * k) / (e + 1), D / 2 - 0.02, M.INT);
     if (H >= 2) {
@@ -680,7 +827,8 @@ export class FurnitureScene {
       this.carcass(W, uh, ud, y0, m);
       for (let k = 1; k <= e; k++)
         this.box(W - 2 * T, T, ud - 0.02, 0, y0 + (uh * k) / (e + 1), ud / 2, M.INT);
-      for (let i = 0; i < n; i++) this.door(-W / 2 + i * dw, y0, dw, uh, ud, m, i % 2 === 0, 0.08);
+      for (let i = 0; i < n; i++)
+        this.door(-W / 2 + i * dw, y0, dw, uh, ud, this.FM, i % 2 === 0, 0.08);
     }
   }
 
@@ -731,7 +879,9 @@ export class FurnitureScene {
         }
       }
     });
-    xs.forEach((x, i) => this.door(x - cw / 2, T, cw, low - T, D, m, i % 2 === 0, low * 0.75));
+    xs.forEach((x, i) =>
+      this.door(x - cw / 2, T, cw, low - T, D, this.FM, i % 2 === 0, low * 0.75),
+    );
   }
 
   private rack(W: number, H: number, D: number, n: number, m: THREE.Material, e: number) {
@@ -751,7 +901,7 @@ export class FurnitureScene {
     this.box(W - 2 * T, T, D - 0.04, 0, y0 + bh / 2, D / 2, M.INT);
     const dw = W / n;
     for (let i = 0; i < n; i++)
-      this.door(-W / 2 + i * dw, y0, dw, bh, D, m, i % 2 === 0, bh - 0.07);
+      this.door(-W / 2 + i * dw, y0, dw, bh, D, this.FM, i % 2 === 0, bh - 0.07);
     const tw = Math.min(1.45, W * 0.55),
       th = tw * 0.5625,
       ty = Math.min(H - th / 2 - 0.1, y0 + bh + 0.32 + th / 2);
@@ -794,7 +944,8 @@ export class FurnitureScene {
     this.box(0.016, 0.016, 0.12, 0, top + 0.24, 0.1, M.STEEL);
     this.box(Math.min(W, 0.9), 0.75, 0.012, 0, top + 0.32 + 0.375, 0.008, M.MIRROR);
     const dw = W / n;
-    for (let i = 0; i < n; i++) this.door(-W / 2 + i * dw, y0, dw, H, D, m, i % 2 === 0, H - 0.07);
+    for (let i = 0; i < n; i++)
+      this.door(-W / 2 + i * dw, y0, dw, H, D, this.FM, i % 2 === 0, H - 0.07);
   }
 
   private clear() {
@@ -810,6 +961,7 @@ export class FurnitureScene {
     this.clear();
     const s = this.st,
       m = this.mats[s.m];
+    this.FM = (s.mf && this.mats[s.mf]) || m;
     const args: [number, number, number, number, THREE.Material, number] = [
       s.W / 100,
       s.H / 100,

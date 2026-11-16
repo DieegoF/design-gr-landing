@@ -34,6 +34,7 @@ export function Configurator() {
     izq: "cajonera",
     der: "estantes",
     mt: "",
+    mf: "",
     r: 0,
   });
   const [open, setOpen] = useState(false);
@@ -90,6 +91,7 @@ export function Configurator() {
       D: t.D[2],
       n: t.n[2],
       e: t.e[2],
+      mf: "",
       ...(k === "escritorio" ? lib.ESCRITORIO_DEF : {}),
       ...preset,
     });
@@ -104,12 +106,14 @@ export function Configurator() {
   const usar = () => {
     if (!lib || !sceneRef.current) return;
     const t = lib.TYPES[st.k];
+    const config = (
+      st.k === "escritorio" ? configEscritorio(lib, st) : configGeneral(lib, st, t)
+    ).join(", ");
     update({
       tipo: t.tipo,
       material: lib.MATERIALS[st.m].grp,
-      config: (st.k === "escritorio" ? configEscritorio(lib, st) : configGeneral(lib, st, t)).join(
-        ", ",
-      ),
+      config,
+      ficha: sceneRef.current.despiece(t.tipo, config),
       an: String(st.W),
       al: String(st.H),
       pr: String(st.D),
@@ -385,42 +389,25 @@ export function Configurator() {
             </div>
 
             {st.k === "escritorio" && (
-              <div className="mt-4">
-                <span className="mb-1.5 flex justify-between text-sm font-semibold text-foreground">
-                  Color de la tapa
-                  <span className="font-medium text-muted-foreground">
-                    {st.mt ? st.mt : "Igual al cuerpo"}
-                  </span>
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => apply({ mt: "" })}
-                    className={cn(
-                      "rounded-full border px-3 py-1.5 text-[12.5px] font-medium",
-                      !st.mt ? "border-primary ring-2 ring-inset ring-primary" : "border-border",
-                    )}
-                  >
-                    Igual al cuerpo
-                  </button>
-                  {MATS.map(([name, m]) => (
-                    <button
-                      key={name}
-                      type="button"
-                      title={name}
-                      aria-label={`Tapa ${name}`}
-                      onClick={() => apply({ mt: name })}
-                      className={cn(
-                        "size-9 rounded-full border-2",
-                        st.mt === name
-                          ? "border-primary ring-2 ring-primary ring-offset-2"
-                          : "border-black/10",
-                      )}
-                      style={{ background: m.css }}
-                    />
-                  ))}
-                </div>
-              </div>
+              <ColorAlt
+                label="Color de la tapa"
+                value={st.mt ?? ""}
+                mats={MATS}
+                onChange={(mt) => apply({ mt })}
+              />
+            )}
+
+            {(st.k !== "escritorio" || st.izq === "cajonera" || st.der === "cajonera") && (
+              <ColorAlt
+                label={
+                  st.k === "escritorio"
+                    ? "Color de los frentes de cajón"
+                    : "Color de puertas y frentes"
+                }
+                value={st.mf ?? ""}
+                mats={MATS}
+                onChange={(mf) => apply({ mf })}
+              />
             )}
 
             <Button
@@ -440,7 +427,7 @@ export function Configurator() {
             <button
               type="button"
               onClick={() => {
-                update({ tipo: OTRO, ref: "", config: "", img: "" });
+                update({ tipo: OTRO, ref: "", config: "", img: "", ficha: null });
                 scrollToSection("presupuesto");
               }}
               className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-accent/70 px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-secondary"
@@ -456,6 +443,58 @@ export function Configurator() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Color alternativo de una parte del mueble ("" = igual al cuerpo). */
+function ColorAlt({
+  label,
+  value,
+  mats,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  mats: [string, MaterialDef][];
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="mt-4">
+      <span className="mb-1.5 flex justify-between gap-2 text-sm font-semibold text-foreground">
+        {label}
+        <span className="text-right font-medium text-muted-foreground">
+          {value || "Igual al cuerpo"}
+        </span>
+      </span>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className={cn(
+            "rounded-full border px-3 py-1.5 text-[12.5px] font-medium",
+            !value ? "border-primary ring-2 ring-inset ring-primary" : "border-border",
+          )}
+        >
+          Igual al cuerpo
+        </button>
+        {mats.map(([name, m]) => (
+          <button
+            key={name}
+            type="button"
+            title={name}
+            aria-label={`${label}: ${name}`}
+            onClick={() => onChange(name)}
+            className={cn(
+              "size-9 rounded-full border-2",
+              value === name
+                ? "border-primary ring-2 ring-primary ring-offset-2"
+                : "border-black/10",
+            )}
+            style={{ background: m.css }}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -515,6 +554,7 @@ function configGeneral(lib: Lib3D, st: FurnitureState, t: TypeDef) {
     st.n ? `${st.n} ${t.nl.toLowerCase()}` : `sin ${t.nl.toLowerCase()}`,
     st.e ? `${st.e} ${st.e === 1 ? "estante" : "estantes"}` : "sin estantes",
     mm(lib, st.m),
+    ...(st.mf ? [`puertas y frentes ${mm(lib, st.mf)}`] : []),
   ];
 }
 
@@ -533,5 +573,8 @@ function configEscritorio(lib: Lib3D, st: FurnitureState) {
     ...(r ? [`${r} ${r === 1 ? "repisa" : "repisas"} en la pared`] : []),
     `cuerpo ${mm(lib, st.m)}`,
     `tapa ${st.mt ? mm(lib, st.mt) : "igual al cuerpo"}`,
+    ...((st.izq === "cajonera" || st.der === "cajonera") && st.mf
+      ? [`frentes de cajón ${mm(lib, st.mf)}`]
+      : []),
   ];
 }
