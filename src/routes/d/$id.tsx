@@ -5,7 +5,15 @@ import { get, head } from "@vercel/blob";
 import { useState } from "react";
 import { Download, LoaderCircle, MessageCircle } from "lucide-react";
 import { SITE_URL } from "@/lib/site";
-import { DESPERDICIO, PLACA_MM, entraEnPlaca, fichaSchema, type Ficha } from "@/lib/despiece";
+import {
+  DESPERDICIO,
+  PLACA_MM,
+  cantosFicha,
+  entraEnPlaca,
+  fichaSchema,
+  textoOrigen,
+  type Ficha,
+} from "@/lib/despiece";
 
 /** Despiece guardado junto con la imagen (los diseños viejos no lo tienen). */
 async function leerFicha(id: string): Promise<Ficha | null> {
@@ -147,6 +155,17 @@ function FichaTaller({ f, img, id }: { f: Ficha; img: string; id: string }) {
       <p className="mt-2 text-muted-foreground">
         <b className="text-foreground">{f.mueble}</b>: {f.config}
       </p>
+      {f.origen && (
+        <p
+          className={
+            f.origen === "taller"
+              ? "mt-2 w-fit rounded-full bg-[#dcf8c6] px-2.5 py-0.5 text-xs font-medium text-[#16130F]"
+              : "mt-2 w-fit rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-medium text-foreground"
+          }
+        >
+          {textoOrigen(f)}
+        </p>
+      )}
 
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {[
@@ -157,7 +176,10 @@ function FichaTaller({ f, img, id }: { f: Ficha; img: string; id: string }) {
               String(p.placas),
               `${p.placas === 1 ? "placa" : "placas"} · ${p.material}`,
             ]),
-          [`${f.cantoM.toLocaleString("es-AR")} m`, "de canto"],
+          ...cantosFicha(f).map((c) => [
+            `${c.m.toLocaleString("es-AR")} m`,
+            c.tipo ? `de canto ${c.tipo}` : "de canto",
+          ]),
         ].map(([n, l]) => (
           <div key={l} className="rounded-xl bg-secondary px-3 py-2">
             <b className="block text-lg tabular-nums">{n}</b>
@@ -227,10 +249,11 @@ function FichaTaller({ f, img, id }: { f: Ficha; img: string; id: string }) {
       </div>
 
       <p className="mt-5 text-xs text-muted-foreground">
-        Medidas en mm, sacadas de la maqueta 3D. Es una estimación para cotizar: las medidas finales
-        se confirman al medir. Placas de {mmTxt(PLACA_MM.largo)} × {mmTxt(PLACA_MM.ancho)} mm con un{" "}
-        {Math.round(DESPERDICIO * 100)}% de desperdicio. Canto: frentes y tapa en los 4 lados, el
-        resto en el lado visible. No incluye mesada, bacha, electrodomésticos ni tornillería.
+        Medidas en mm. Es una estimación para cotizar: las medidas finales se confirman al medir.
+        Placas de {mmTxt(PLACA_MM.largo)} × {mmTxt(PLACA_MM.ancho)} mm con un{" "}
+        {Math.round(DESPERDICIO * 100)}% de desperdicio. Canto de 2 mm en frentes y tapa (4 lados),
+        de 0,4 mm en el lado visible del resto. No incluye mesada, bacha, electrodomésticos ni
+        tornillería.
         {grandes && " Las piezas marcadas son más grandes que una placa: se arman en partes."}
       </p>
     </section>
