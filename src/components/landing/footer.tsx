@@ -2,10 +2,9 @@ import { Instagram, Phone } from "lucide-react";
 import { scrollToSection } from "@/lib/scroll";
 
 const footerLinks = [
-  { label: "Servicios", id: "servicios" },
-  { label: "Galería", id: "galeria" },
+  { label: "Armá tu mueble", id: "armalo" },
+  { label: "Trabajos", id: "galeria" },
   { label: "Nosotros", id: "nosotros" },
-  { label: "Contacto", id: "contacto" },
 ];
 
 export function Footer() {
@@ -56,8 +55,24 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-border/40 pt-8 text-center">
+          <p className="mx-auto mb-3 max-w-3xl text-sm text-muted-foreground">
+            Carpintería de muebles a medida en La Plata: escritorios, cocinas, placards, vestidores,
+            bibliotecas, muebles de baño y de TV. Diseño, fabricación e instalación en La Plata,
+            CABA y AMBA.
+          </p>
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Design.gr. Todos los derechos reservados.
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Desarrollado por{" "}
+            <a
+              href="https://diegodev.com.ar"
+              target="_blank"
+              rel="noopener"
+              className="font-semibold text-foreground underline-offset-4 hover:text-accent hover:underline"
+            >
+              diegodev
+            </a>
           </p>
         </div>
       </div>

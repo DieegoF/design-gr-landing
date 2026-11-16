@@ -2,43 +2,39 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   Navbar,
   Hero,
-  Services,
+  Asistente,
+  Avanzado,
   Gallery,
   About,
-  Testimonials,
-  Contact,
   Footer,
   FloatingWhatsApp,
+  QuoteProvider,
 } from "@/components/landing";
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    meta: [
-      { title: "Design.gr | Muebles a medida en La Plata, CABA y AMBA" },
-      {
-        name: "description",
-        content:
-          "Carpintería de muebles a medida en La Plata. Cocinas, placards, vestidores, escritorios, bibliotecas y muebles de baño. Diseño integral y trabajos en CABA y AMBA.",
-      },
-    ],
+    meta: [{ title: SITE_TITLE }, { name: "description", content: SITE_DESCRIPTION }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
   }),
   component: LandingPage,
 });
 
 function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main>
-        <Hero />
-        <Services />
-        <Gallery />
-        <About />
-        <Testimonials />
-        <Contact />
-      </main>
-      <Footer />
-      <FloatingWhatsApp />
-    </div>
+    <QuoteProvider>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main>
+          <Hero />
+          <Asistente />
+          <Avanzado />
+          <Gallery />
+          <About />
+        </main>
+        <Footer />
+        <FloatingWhatsApp />
+      </div>
+    </QuoteProvider>
   );
 }
