@@ -18,6 +18,9 @@ export const TIPOS = [
   OTRO,
 ] as const;
 
+export const ZONAS = ["La Plata", "CABA", "AMBA (otra zona)"];
+export const PLAZOS = ["Lo antes posible", "En 1–2 meses", "Estoy averiguando"];
+
 export const TIPO_TO_KIND: Partial<Record<string, FurnitureKind>> = {
   Escritorio: "escritorio",
   Cocina: "cocina",
@@ -74,11 +77,25 @@ export interface ConfigRequest {
   nonce: number;
 }
 
+/** Pedido de "abrir el asistente con este mueble" (hero, trabajos, menú). */
+export interface WizardRequest {
+  tipo: string;
+  preset?: Partial<FurnitureState>;
+  /** Título del trabajo de la galería que eligió ("Quiero algo así"). */
+  ref?: string;
+  nonce: number;
+}
+
 interface Ctx {
   q: QuoteState;
   update: (p: Partial<QuoteState>) => void;
   cfgReq: ConfigRequest | null;
   showIn3D: (kind: FurnitureKind, preset?: Partial<FurnitureState>) => void;
+  wizReq: WizardRequest | null;
+  abrirAsistente: (tipo: string, preset?: Partial<FurnitureState>, ref?: string) => void;
+  /** Configurador con sliders + formulario: solo se muestran si el cliente los pide. */
+  avanzado: boolean;
+  abrirAvanzado: (kind: FurnitureKind, preset?: Partial<FurnitureState>) => void;
 }
 
 const QuoteCtx = createContext<Ctx | null>(null);
@@ -92,7 +109,24 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
       setCfgReq({ kind, preset, nonce: Date.now() }),
     [],
   );
-  const value = useMemo(() => ({ q, update, cfgReq, showIn3D }), [q, update, cfgReq, showIn3D]);
+  const [wizReq, setWizReq] = useState<WizardRequest | null>(null);
+  const abrirAsistente = useCallback(
+    (tipo: string, preset?: Partial<FurnitureState>, ref?: string) =>
+      setWizReq({ tipo, preset, ref, nonce: Date.now() }),
+    [],
+  );
+  const [avanzado, setAvanzado] = useState(false);
+  const abrirAvanzado = useCallback(
+    (kind: FurnitureKind, preset?: Partial<FurnitureState>) => {
+      setAvanzado(true);
+      showIn3D(kind, preset);
+    },
+    [showIn3D],
+  );
+  const value = useMemo(
+    () => ({ q, update, cfgReq, showIn3D, wizReq, abrirAsistente, avanzado, abrirAvanzado }),
+    [q, update, cfgReq, showIn3D, wizReq, abrirAsistente, avanzado, abrirAvanzado],
+  );
   return <QuoteCtx.Provider value={value}>{children}</QuoteCtx.Provider>;
 }
 

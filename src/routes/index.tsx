@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   Navbar,
   Hero,
-  Configurator,
+  Asistente,
+  Avanzado,
   Gallery,
-  Quote,
   About,
   Footer,
   FloatingWhatsApp,
@@ -27,9 +27,9 @@ function LandingPage() {
         <Navbar />
         <main>
           <Hero />
-          <Configurator />
+          <Asistente />
+          <Avanzado />
           <Gallery />
-          <Quote />
           <About />
         </main>
         <Footer />

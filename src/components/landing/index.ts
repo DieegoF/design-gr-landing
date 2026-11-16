@@ -9,4 +9,6 @@ export { Footer } from "./footer";
 export { FloatingWhatsApp } from "./floating-whatsapp";
 export { Configurator } from "./configurator";
 export { Quote } from "./quote";
+export { Asistente } from "./asistente";
+export { Avanzado } from "./avanzado";
 export { QuoteProvider } from "./quote-context";

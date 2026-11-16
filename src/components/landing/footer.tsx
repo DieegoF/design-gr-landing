@@ -2,9 +2,8 @@ import { Instagram, Phone } from "lucide-react";
 import { scrollToSection } from "@/lib/scroll";
 
 const footerLinks = [
-  { label: "Armalo en 3D", id: "armalo" },
+  { label: "Armá tu mueble", id: "armalo" },
   { label: "Trabajos", id: "galeria" },
-  { label: "Presupuesto", id: "presupuesto" },
   { label: "Nosotros", id: "nosotros" },
 ];
 

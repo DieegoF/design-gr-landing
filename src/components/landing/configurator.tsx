@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { scrollToSection } from "@/lib/scroll";
 import { OTRO, useQuote } from "./quote-context";
+import { configEscritorio, configGeneral } from "@/lib/config-texto";
 import type {
   FurnitureKind,
   FurnitureScene,
@@ -107,9 +108,7 @@ export function Configurator() {
   const usar = () => {
     if (!lib || !sceneRef.current) return;
     const t = lib.TYPES[st.k];
-    const config = (
-      st.k === "escritorio" ? configEscritorio(lib, st) : configGeneral(lib, st, t)
-    ).join(", ");
+    const config = (st.k === "escritorio" ? configEscritorio(st) : configGeneral(st, t)).join(", ");
     update({
       tipo: t.tipo,
       material: lib.MATERIALS[st.m].grp,
@@ -128,11 +127,11 @@ export function Configurator() {
   const MATS: [string, MaterialDef][] = lib ? Object.entries(lib.MATERIALS) : [];
 
   return (
-    <section id="armalo" className="bg-secondary px-4 py-20 sm:px-6 lg:px-8">
+    <section id="avanzado" className="bg-secondary px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <p className="text-sm font-medium uppercase tracking-widest text-accent">Armalo en 3D</p>
+        <p className="text-sm font-medium uppercase tracking-widest text-accent">Modo avanzado</p>
         <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-          Mirá cómo quedaría tu mueble
+          Ajustá tu mueble al detalle
         </h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">
           Elegí el mueble, las medidas y el material. Arrastrá para girarlo y abrí las puertas para
@@ -554,40 +553,4 @@ function Contador({
       </div>
     </div>
   );
-}
-
-type Lib3D = typeof import("@/lib/furniture3d");
-
-const mm = (lib: Lib3D, m: string) =>
-  `${m.toLowerCase()}${lib.MATERIALS[m]?.grp === "Melamina" ? ` ${lib.ESPESOR_MM} mm` : ""}`;
-
-function configGeneral(lib: Lib3D, st: FurnitureState, t: TypeDef) {
-  return [
-    `${t.lab.toLowerCase()} de ${st.W}×${st.H}×${st.D} cm`,
-    st.n ? `${st.n} ${t.nl.toLowerCase()}` : `sin ${t.nl.toLowerCase()}`,
-    st.e ? `${st.e} ${st.e === 1 ? "estante" : "estantes"}` : "sin estantes",
-    mm(lib, st.m),
-    ...(st.mf ? [`puertas y frentes ${mm(lib, st.mf)}`] : []),
-  ];
-}
-
-function configEscritorio(lib: Lib3D, st: FurnitureState) {
-  const lado = (l?: LadoEscritorio) =>
-    l === "cajonera"
-      ? `cajonera de ${st.n} cajones (${lib.MODULO_CM} cm)`
-      : l === "estantes"
-        ? `columna con ${st.e} ${st.e === 1 ? "estante" : "estantes"} (${lib.MODULO_CM} cm)`
-        : "pata lateral";
-  const r = st.r ?? 0;
-  return [
-    `escritorio de ${st.W}×${st.H}×${st.D} cm`,
-    `izquierda: ${lado(st.izq)}`,
-    `derecha: ${lado(st.der)}`,
-    ...(r ? [`${r} ${r === 1 ? "repisa" : "repisas"} en la pared`] : []),
-    `cuerpo ${mm(lib, st.m)}`,
-    `tapa ${st.mt ? mm(lib, st.mt) : "igual al cuerpo"}`,
-    ...((st.izq === "cajonera" || st.der === "cajonera") && st.mf
-      ? [`frentes de cajón ${mm(lib, st.mf)}`]
-      : []),
-  ];
 }
