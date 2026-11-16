@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useInView } from "@/hooks/use-in-view";
 import { scrollToSection } from "@/lib/scroll";
-import type { FurnitureKind, FurnitureState } from "@/lib/furniture3d";
+import { ESCRITORIO_DEF, type FurnitureKind, type FurnitureState } from "@/lib/furniture3d";
 import { useQuote } from "./quote-context";
 
 const images: {
@@ -10,7 +10,16 @@ const images: {
   title: string;
   tipo: string;
   preset?: Partial<FurnitureState> & { k: FurnitureKind };
+  featured?: boolean;
 }[] = [
+  {
+    src: "/images/gallery-escritorio.jpeg",
+    alt: "Escritorio a medida en melamina blanca con cajonera de 4 cajones y columna con estantes",
+    title: "Escritorio con cajonera y estantes",
+    tipo: "Escritorio",
+    preset: { k: "escritorio", ...ESCRITORIO_DEF },
+    featured: true,
+  },
   {
     src: "/images/gallery-1.jpeg",
     alt: "Placard a medida con puertas corredizas, trabajo de Design.gr",
@@ -82,37 +91,78 @@ export function Gallery() {
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
-          {images.map((image, index) => (
-            <div
-              key={image.title}
-              className={cn(
-                "flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card fade-in",
-                isInView && "fade-in-visible",
-              )}
-              style={{ transitionDelay: `${index * 80}ms` }}
-            >
-              <div className="overflow-hidden bg-muted">
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  width={800}
-                  height={600}
-                  className="aspect-[4/5] size-full object-cover transition-transform duration-500 hover:scale-105 sm:aspect-[4/3]"
-                  loading="lazy"
-                />
+          {images.map((image, index) =>
+            image.featured ? (
+              <div
+                key={image.title}
+                className={cn(
+                  "col-span-2 grid overflow-hidden rounded-xl border-2 border-accent bg-card fade-in sm:grid-cols-2 lg:col-span-3",
+                  isInView && "fade-in-visible",
+                )}
+              >
+                <div className="overflow-hidden bg-muted">
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    width={800}
+                    height={1067}
+                    className="aspect-[4/3] size-full object-cover transition-transform duration-500 hover:scale-105 sm:aspect-auto sm:max-h-[460px]"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex flex-col justify-center gap-3 p-5 sm:p-8">
+                  <span className="w-fit rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground">
+                    Nuestra especialidad
+                  </span>
+                  <b className="font-display text-2xl font-medium text-foreground sm:text-3xl">
+                    {image.title}
+                  </b>
+                  <p className="text-[15px] text-muted-foreground">
+                    Melamina blanca, cajonera de 4 cajones a la izquierda y columna con estantes a
+                    la derecha. Es el modelo que más nos piden: lo abrís en 3D y le cambiás las
+                    medidas, los cajones y el color.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => pick(image)}
+                    className="mt-2 w-full rounded-full bg-primary px-5 py-2.5 text-[14px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 sm:w-fit"
+                  >
+                    Quiero algo así
+                  </button>
+                </div>
               </div>
-              <div className="flex flex-1 flex-col gap-2.5 p-3 sm:p-4">
-                <b className="text-[14.5px] font-semibold text-foreground">{image.title}</b>
-                <button
-                  type="button"
-                  onClick={() => pick(image)}
-                  className="mt-auto rounded-full border-[1.5px] border-primary px-3 py-2 text-[13.5px] font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                >
-                  Quiero algo así
-                </button>
+            ) : (
+              <div
+                key={image.title}
+                className={cn(
+                  "flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card fade-in",
+                  isInView && "fade-in-visible",
+                )}
+                style={{ transitionDelay: `${index * 80}ms` }}
+              >
+                <div className="overflow-hidden bg-muted">
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    width={800}
+                    height={600}
+                    className="aspect-[4/5] size-full object-cover transition-transform duration-500 hover:scale-105 sm:aspect-[4/3]"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col gap-2.5 p-3 sm:p-4">
+                  <b className="text-[14.5px] font-semibold text-foreground">{image.title}</b>
+                  <button
+                    type="button"
+                    onClick={() => pick(image)}
+                    className="mt-auto rounded-full border-[1.5px] border-primary px-3 py-2 text-[13.5px] font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                  >
+                    Quiero algo así
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </div>
     </section>
