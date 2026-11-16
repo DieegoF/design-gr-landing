@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { SITE_URL } from "@/lib/site";
 
-const BASE_URL = "";
+const BASE_URL = SITE_URL;
+// Fecha del último cambio de contenido de la portada; actualizarla al cambiar textos o fotos.
+const LASTMOD = "2026-11-15";
 
 interface SitemapEntry {
   path: string;
@@ -14,7 +17,9 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const entries: SitemapEntry[] = [{ path: "/", changefreq: "weekly", priority: "1.0" }];
+        const entries: SitemapEntry[] = [
+          { path: "/", lastmod: LASTMOD, changefreq: "weekly", priority: "1.0" },
+        ];
 
         const urls = entries.map((e) =>
           [

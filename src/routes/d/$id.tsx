@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestUrl } from "@tanstack/react-start/server";
 import { head } from "@vercel/blob";
 import { MessageCircle } from "lucide-react";
+import { SITE_URL } from "@/lib/site";
 
 const getDiseno = createServerFn({ method: "GET" })
   .validator((id: string) => {
@@ -42,7 +43,7 @@ export const Route = createFileRoute("/d/$id")({
     if (!d) throw notFound();
     return d;
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
     const t = loaderData?.foto ? TXT.foto : TXT.diseno;
     return {
       meta: [
@@ -51,6 +52,7 @@ export const Route = createFileRoute("/d/$id")({
         { property: "og:title", content: t.titulo },
         { property: "og:description", content: t.desc },
         { property: "og:type", content: "website" },
+        { property: "og:url", content: `${SITE_URL}/d/${params.id}` },
         ...(loaderData
           ? [
               { property: "og:image", content: loaderData.url },

@@ -10,17 +10,12 @@ import {
   FloatingWhatsApp,
   QuoteProvider,
 } from "@/components/landing";
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    meta: [
-      { title: "Design.gr | Escritorios y muebles a medida en La Plata, CABA y AMBA" },
-      {
-        name: "description",
-        content:
-          "Especialistas en escritorios a medida en La Plata. También cocinas, placards, vestidores, bibliotecas y muebles de baño. Diseño integral y trabajos en CABA y AMBA.",
-      },
-    ],
+    meta: [{ title: SITE_TITLE }, { name: "description", content: SITE_DESCRIPTION }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
   }),
   component: LandingPage,
 });
