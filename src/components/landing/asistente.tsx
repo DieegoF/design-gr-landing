@@ -499,6 +499,13 @@ export function Asistente() {
     setFalta("");
   };
 
+  const empezarDeNuevo = () => {
+    setW({ ...W0, st: ST0 });
+    setFalta("");
+    arriba();
+  };
+  const hayAlgo = !!w.tipo || w.paso > 0;
+
   const ir = (i: number) => {
     setW((s) => ({ ...s, paso: Math.max(0, Math.min(pasos.length - 1, i)) }));
     setFalta("");
@@ -1150,6 +1157,15 @@ export function Asistente() {
                 Seguir armando: {w.tipo}
               </button>
             )}
+            {w.tipo && w.paso > 0 && (
+              <button
+                type="button"
+                onClick={empezarDeNuevo}
+                className="-mt-1 mb-4 w-full py-2 text-[15px] font-semibold text-muted-foreground underline underline-offset-4"
+              >
+                Empezar de nuevo
+              </button>
+            )}
             {tarjetasTipo((t) => {
               elegir(t);
               setFull(true);
@@ -1171,7 +1187,17 @@ export function Asistente() {
         >
           {enPantalla && (
             <div className="flex flex-none items-center justify-between gap-3 border-b border-border bg-background px-4 py-2.5">
-              <b className="font-display text-xl font-semibold">Design.gr</b>
+              {hayAlgo ? (
+                <button
+                  type="button"
+                  onClick={empezarDeNuevo}
+                  className="py-2 text-[15px] font-semibold text-muted-foreground underline underline-offset-4"
+                >
+                  Empezar de nuevo
+                </button>
+              ) : (
+                <b className="font-display text-xl font-semibold">Design.gr</b>
+              )}
               <span className="text-[15px] font-semibold text-muted-foreground">
                 Paso {iPaso + 1} de {pasos.length}
               </span>
@@ -1254,13 +1280,10 @@ export function Asistente() {
                   <span>
                     Paso {iPaso + 1} de {pasos.length}
                   </span>
-                  {(w.tipo || w.paso > 0) && (
+                  {hayAlgo && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setW({ ...W0, st: ST0 });
-                        setFalta("");
-                      }}
+                      onClick={empezarDeNuevo}
                       className="underline underline-offset-4"
                     >
                       Empezar de nuevo
