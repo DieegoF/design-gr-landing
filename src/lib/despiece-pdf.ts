@@ -3,7 +3,14 @@
 // Se carga solo en el navegador, al tocar "Descargar PDF".
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { DESPERDICIO, PLACA_MM, entraEnPlaca, type Ficha } from "./despiece";
+import {
+  DESPERDICIO,
+  PLACA_MM,
+  cantosFicha,
+  entraEnPlaca,
+  textoOrigen,
+  type Ficha,
+} from "./despiece";
 
 const TINTA: [number, number, number] = [30, 26, 22];
 const GRIS: [number, number, number] = [110, 102, 94];
@@ -64,7 +71,14 @@ export async function descargarDespiecePdf(f: Ficha, imgUrl: string | null, id: 
   doc.setTextColor(...GRIS).setFontSize(9);
   const conf = doc.splitTextToSize(`Diseño: ${f.config}`, PW - 2 * M);
   doc.text(conf, M, y);
-  y += conf.length * 4 + 3;
+  y += conf.length * 4;
+  if (f.origen) {
+    doc.setFont("helvetica", "bold").setTextColor(...(f.origen === "taller" ? GRIS : DORADO));
+    doc.text(textoOrigen(f), M, y + 1);
+    doc.setFont("helvetica", "normal");
+    y += 5;
+  }
+  y += 3;
 
   // ---- imagen + resultados ----
   const img = imgUrl ? await imagenComoDataUrl(imgUrl) : null;
@@ -90,7 +104,7 @@ export async function descargarDespiecePdf(f: Ficha, imgUrl: string | null, id: 
         `Tableros ${p.material} ${p.esp} mm`,
         `${p.placas} (${num(p.m2)} m2)`,
       ]),
-      ["Canto", `${num(f.cantoM)} m`],
+      ...cantosFicha(f).map((c) => [c.tipo ? `Canto ${c.tipo}` : "Canto", `${num(c.m)} m`]),
       ...f.herrajes.map((h) => [h.nombre, String(h.cant)]),
     ],
     styles: { fontSize: 8.5, cellPadding: 1.6, textColor: TINTA, lineColor: [180, 172, 160] },
@@ -114,6 +128,11 @@ export async function descargarDespiecePdf(f: Ficha, imgUrl: string | null, id: 
     const [material, esp] = key.split("|");
     const filas = f.piezas.filter((p) => p.material === material && String(p.esp) === esp);
     const placas = f.placas.find((p) => p.material === material && String(p.esp) === esp);
+    // si no entran el título y un par de filas, la tabla arranca en la hoja siguiente
+    if (y > doc.internal.pageSize.getHeight() - 50) {
+      doc.addPage();
+      y = M;
+    }
     autoTable(doc, {
       startY: y + 2,
       margin: { left: M, right: M, bottom: 18 },

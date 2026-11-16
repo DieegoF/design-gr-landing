@@ -2,14 +2,7 @@
 // Se carga solo en el navegador (three.js) desde el componente Configurator.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as THREE from "three";
-import {
-  agrupar,
-  despieceEscritorio,
-  hoy,
-  resumenPlacas,
-  type Ficha,
-  type Pieza,
-} from "./despiece";
+import { despieceMueble, type Ficha } from "./despiece";
 
 export type FurnitureKind = "escritorio" | "placard" | "cocina" | "biblio" | "rack" | "vanit";
 
@@ -465,149 +458,28 @@ export class FurnitureScene {
     return this.canvas.toDataURL("image/jpeg", 0.85);
   }
 
-  /**
-   * Despiece estimado a partir de las piezas de la maqueta (no del mueble final).
-   * Incluye piezas de 18 mm, fondos de 3 mm, cajas de cajón, cantos y herrajes.
-   */
+  /** Despiece del mueble (reglas de armado, no las piezas de la maqueta). */
   despiece(mueble: string, config: string): Ficha {
     const s = this.st;
-    if (s.k === "escritorio")
-      return despieceEscritorio(
-        {
-          W: s.W,
-          H: s.H,
-          D: s.D,
-          n: s.n,
-          e: s.e,
-          r: s.r ?? 0,
-          izq: s.izq ?? "cajonera",
-          der: s.der ?? "estantes",
-          modulo: MODULO_CM,
-          m: s.m,
-          mt: s.mt ?? "",
-          mf: s.mf ?? "",
-        },
-        config,
-      );
-    const T = ESPESOR_MM / 1000;
-    const nombreMat = new Map<THREE.Material, string>(
-      Object.entries(this.mats).map(([k, v]) => [v, k]),
-    );
-    // interiores (cajas de cajón, estantes de placard) en melamina blanca: comparten placa con el cuerpo blanco
-    const INTERIOR = "Melamina blanca";
-    const FONDO = "Fondo fibrofácil";
-    const mm = (v: number) => Math.round(v * 1000);
-    const piezas: Pieza[] = [];
-    let canto = 0;
-    let cajones = 0;
-    let bisagras = 0;
-    const add = (
-      pieza: string,
-      material: string,
-      esp: number,
-      a: number,
-      b: number,
-      cantoMm = 0,
-    ) => {
-      piezas.push({
-        pieza,
-        material,
-        esp,
-        largo: Math.max(mm(a), mm(b)),
-        ancho: Math.min(mm(a), mm(b)),
-        cant: 1,
-      });
-      canto += cantoMm;
-    };
-
-    this.G.traverse((o) => {
-      if (!(o instanceof THREE.Mesh) || !(o.geometry instanceof THREE.BoxGeometry)) return;
-      const { width: w, height: h, depth: d } = o.geometry.parameters;
-      const mat = o.material as THREE.Material;
-      const ud = o.userData as { pieza?: string; cajon?: boolean };
-
-      if (ud.cajon) {
-        // caja del cajón: 2 laterales, frente y contrafrente interiores, piso de 3 mm
-        cajones++;
-        add("Lateral de cajón", INTERIOR, ESPESOR_MM, d, h, mm(d));
-        add("Lateral de cajón", INTERIOR, ESPESOR_MM, d, h, mm(d));
-        add(
-          "Frente interior / contrafrente de cajón",
-          INTERIOR,
-          ESPESOR_MM,
-          w - 2 * T,
-          h,
-          mm(w - 2 * T),
-        );
-        add(
-          "Frente interior / contrafrente de cajón",
-          INTERIOR,
-          ESPESOR_MM,
-          w - 2 * T,
-          h,
-          mm(w - 2 * T),
-        );
-        add("Piso de cajón", FONDO, 3, w, d);
-        return;
-      }
-
-      let material = nombreMat.get(mat);
-      if (!material) {
-        if (mat === this.M.INT) material = INTERIOR;
-        else if (mat === this.M.BACK) material = Math.min(w, h, d) < 0.012 ? FONDO : INTERIOR;
-        else return; // herrajes, mesada, libros, electrodomésticos: no son piezas de placa
-      }
-      const min = Math.min(w, h, d);
-      const fino = min < 0.012;
-      const esp = fino && material === FONDO ? 3 : ESPESOR_MM;
-
-      if (ud.pieza === "Puerta" || ud.pieza === "Frente de cajón") {
-        if (ud.pieza === "Puerta") {
-          bisagras += h < 0.9 ? 2 : h < 1.6 ? 3 : 4;
-        }
-        add(ud.pieza, material, esp, w, h, 2 * (mm(w) + mm(h)));
-        return;
-      }
-      if (ud.pieza === "Tapa del escritorio") {
-        add(ud.pieza, material, esp, w, d, 2 * (mm(w) + mm(d)));
-        return;
-      }
-      if (fino) {
-        // fondo: la cara grande es la que no es el espesor
-        const [a, b] = w === min ? [h, d] : h === min ? [w, d] : [w, h];
-        add("Fondo", material, esp, a, b);
-        return;
-      }
-      // orientación según el eje del espesor
-      if (Math.abs(w - T) < 1e-4) add("Lateral / división", material, esp, h, d, mm(h));
-      else if (Math.abs(h - T) < 1e-4) add("Piso, techo o estante", material, esp, w, d, mm(w));
-      else if (Math.abs(d - T) < 1e-4)
-        // listón vertical (panel de listones del rack) o zócalo / travesaño horizontal
-        add(
-          w < 0.06 && h > w ? "Listón" : "Zócalo / travesaño",
-          material,
-          esp,
-          w,
-          h,
-          w < 0.06 && h > w ? 0 : mm(w),
-        );
-      else add("Pieza", material, esp, Math.max(w, h, d), [w, h, d].sort((x, y) => x - y)[1]);
-    });
-
-    const grupos = agrupar(piezas);
-    return {
-      v: 1,
+    return despieceMueble(
+      {
+        k: s.k,
+        W: s.W,
+        H: s.H,
+        D: s.D,
+        n: s.n,
+        e: s.e,
+        m: s.m,
+        mf: s.mf ?? "",
+        r: s.r ?? 0,
+        izq: s.izq,
+        der: s.der,
+        modulo: MODULO_CM,
+        mt: s.mt ?? "",
+      },
       mueble,
-      fecha: hoy(),
       config,
-      piezas: grupos,
-      cantoM: Math.round(canto / 100) / 10,
-      placas: resumenPlacas(grupos),
-      herrajes: [
-        { nombre: "Correderas (par por cajón)", cant: cajones },
-        { nombre: "Bisagras", cant: bisagras },
-      ].filter((x) => x.cant > 0),
-    };
+    );
   }
 
   // ---------- construcción ----------
