@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { useInView } from "@/hooks/use-in-view";
-import { scrollToSection } from "@/lib/scroll";
 import { ESCRITORIO_DEF, type FurnitureKind, type FurnitureState } from "@/lib/furniture3d";
 import { useQuote } from "./quote-context";
 
@@ -64,15 +63,12 @@ const images: {
 
 export function Gallery() {
   const { ref, isInView } = useInView();
-  const { update, showIn3D } = useQuote();
+  const { abrirAsistente } = useQuote();
 
+  // Abre el asistente con el mueble de la foto ya cargado (medidas y color).
   const pick = (img: (typeof images)[number]) => {
-    update({ tipo: img.tipo, ref: img.title });
-    if (img.preset) {
-      const { k, ...rest } = img.preset;
-      showIn3D(k, rest);
-      scrollToSection("armalo");
-    } else scrollToSection("presupuesto");
+    const { k: _k, ...preset } = img.preset ?? { k: undefined };
+    abrirAsistente(img.tipo, img.preset ? preset : undefined, img.title);
   };
 
   return (

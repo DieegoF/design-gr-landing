@@ -11,8 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInView } from "@/hooks/use-in-view";
-import { scrollToSection } from "@/lib/scroll";
-import { OTRO, TIPO_TO_KIND, useQuote } from "./quote-context";
+import { OTRO, useQuote } from "./quote-context";
 
 const cats: { tipo: string; desc: string; icon: LucideIcon }[] = [
   { tipo: "Cocina", desc: "Bajo mesada y alacenas", icon: CookingPot },
@@ -26,16 +25,9 @@ const cats: { tipo: string; desc: string; icon: LucideIcon }[] = [
 
 export function Hero() {
   const { ref, isInView } = useInView();
-  const { update, showIn3D } = useQuote();
+  const { abrirAsistente } = useQuote();
 
-  const pick = (tipo: string) => {
-    update({ tipo, ref: "" });
-    const k = TIPO_TO_KIND[tipo];
-    if (k) {
-      showIn3D(k);
-      scrollToSection("armalo");
-    } else scrollToSection("presupuesto");
-  };
+  const pick = (tipo: string) => abrirAsistente(tipo);
 
   return (
     <section
@@ -52,8 +44,8 @@ export function Hero() {
             ¿Qué mueble <em className="text-accent">necesitás?</em>
           </p>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-            Elegí uno, armalo en 3D con tus medidas y el material, y mandanos el pedido de
-            presupuesto listo por WhatsApp.
+            Elegí uno, contestá unas preguntas cortas y miralo en 3D. Tu pedido de presupuesto nos
+            llega listo por WhatsApp.
           </p>
           <button
             type="button"
@@ -73,7 +65,7 @@ export function Hero() {
               </small>
             </span>
             <span className="hidden flex-none rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground sm:block">
-              Armalo en 3D
+              Armalo
             </span>
           </button>
           <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3">

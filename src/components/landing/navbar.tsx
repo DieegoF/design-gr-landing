@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { scrollToSection } from "@/lib/scroll";
 
 const navLinks = [
-  { label: "Armalo en 3D", id: "armalo" },
+  { label: "Armá tu mueble", id: "armalo" },
   { label: "Trabajos", id: "galeria" },
-  { label: "Presupuesto", id: "presupuesto" },
   { label: "Nosotros", id: "nosotros" },
 ];
 
@@ -42,7 +41,7 @@ export function Navbar() {
               {link.label}
             </button>
           ))}
-          <Button size="sm" onClick={() => handleNav("presupuesto")}>
+          <Button size="sm" onClick={() => handleNav("armalo")}>
             Pedí tu presupuesto
           </Button>
         </nav>
@@ -68,7 +67,7 @@ export function Navbar() {
                 {link.label}
               </button>
             ))}
-            <Button className="w-full" onClick={() => handleNav("presupuesto")}>
+            <Button className="w-full" onClick={() => handleNav("armalo")}>
               Pedí tu presupuesto
             </Button>
           </nav>
