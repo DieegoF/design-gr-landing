@@ -749,7 +749,7 @@ export function Asistente() {
                   onClick={() => cambiarSt(w.trab!, { tam: "trabajo" })}
                   className="flex-col items-start pr-10 text-left"
                 >
-                  <span>Como el de la foto</span>
+                  <span>{w.ref ? "Como el de la foto" : "Como el modelo que elegiste"}</span>
                   <small className="text-[14.5px] font-normal text-muted-foreground">
                     {w.ref ? `«${w.ref}» · ` : ""}
                     {fmt(w.trab.W)} de ancho · {fmt(w.trab.H)} de alto

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   Navbar,
   Hero,
+  Modelos,
   Asistente,
   Avanzado,
   Gallery,
@@ -27,6 +28,7 @@ function LandingPage() {
         <Navbar />
         <main>
           <Hero />
+          <Modelos />
           <Asistente />
           <Avanzado />
           <Gallery />
