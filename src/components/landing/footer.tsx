@@ -1,3 +1,4 @@
+import { scrollSuave } from "@/lib/smooth";
 import { Instagram, Phone } from "lucide-react";
 import { scrollToSection } from "@/lib/scroll";
 
@@ -16,7 +17,7 @@ export function Footer() {
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              window.scrollTo({ top: 0, behavior: "smooth" });
+              scrollSuave(0);
             }}
             className="font-display text-xl font-semibold text-foreground"
           >

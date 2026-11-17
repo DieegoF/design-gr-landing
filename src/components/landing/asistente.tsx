@@ -1,6 +1,7 @@
 // Asistente "Armá tu mueble": una pregunta por pantalla y el 3D que cambia con cada respuesta.
 // Pensado para gente que no se lleva bien con la tecnología: botones grandes, siempre hay
 // una salida "No sé", y en el celu se abre a pantalla completa.
+import { getLenis } from "@/lib/smooth";
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import {
   Bath,
@@ -431,10 +432,12 @@ export function Asistente() {
     if (!enPantalla) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    getLenis()?.stop();
     const esc = (e: KeyboardEvent) => e.key === "Escape" && setFull(false);
     window.addEventListener("keydown", esc);
     return () => {
       document.body.style.overflow = prev;
+      getLenis()?.start();
       window.removeEventListener("keydown", esc);
     };
   }, [enPantalla]);

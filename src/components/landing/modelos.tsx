@@ -10,6 +10,7 @@ import {
   ajustarEscritorio,
   type FurnitureState,
 } from "@/lib/furniture3d";
+import { scrollSuave } from "@/lib/smooth";
 import { useQuote } from "./quote-context";
 
 interface Modelo {
@@ -108,7 +109,7 @@ export function Modelos() {
         trigger: secRef.current,
         start: "top top",
         end: "bottom bottom",
-        scrub: true,
+        scrub: 0.8,
         onUpdate: (self) => {
           const p = self.progress * N;
           const i = Math.min(N - 1, Math.floor(p));
@@ -117,6 +118,12 @@ export function Modelos() {
             idxRef.current = i;
             setIdx(i);
             sceneRef.current?.set({ ...MODELOS[i].st });
+            if (stageRef.current && !quieto)
+              gsap.fromTo(
+                stageRef.current,
+                { opacity: 0.25, scale: 0.96 },
+                { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out", overwrite: true },
+              );
           }
           const sc = sceneRef.current;
           if (!sc) return;
@@ -151,7 +158,7 @@ export function Modelos() {
     if (!s) return;
     const top = s.getBoundingClientRect().top + window.scrollY;
     const recorrido = s.offsetHeight - window.innerHeight;
-    window.scrollTo({ top: top + ((i + 0.5) / N) * recorrido, behavior: "smooth" });
+    scrollSuave(top + ((i + 0.5) / N) * recorrido);
   };
 
   const m = MODELOS[idx];
