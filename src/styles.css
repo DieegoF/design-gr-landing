@@ -52,7 +52,9 @@
 
 :root {
   --radius: 0.625rem;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
   --font-display: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --background: oklch(0.98 0.005 80);
   --foreground: oklch(0.22 0.02 50);
@@ -136,7 +138,12 @@
     font-family: var(--font-sans);
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
   }
 
@@ -148,10 +155,217 @@
 @utility fade-in {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.7s ease-out;
 }
 
 @utility fade-in-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ───────────── Pantalla de carga (splash) ───────────── */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  background: #1c1814;
+  color: #f7f4ee;
+  transition:
+    opacity 0.55s ease,
+    transform 0.6s cubic-bezier(0.7, 0, 0.3, 1),
+    visibility 0s linear 0.6s;
+  /* Red de seguridad: si el JS no carga, se va sola. */
+  animation: splash-fuera 0.55s ease 2.4s forwards;
+}
+
+[data-splash="done"] .splash {
+  opacity: 0;
+  transform: translateY(-3%);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+[data-splash="skip"] .splash {
+  display: none;
+}
+
+@keyframes splash-fuera {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.splash-mueble {
+  width: 7.5rem;
+  height: auto;
+  overflow: visible;
+}
+
+.splash-mueble rect {
+  fill: #b88f3a;
+  transform-box: fill-box;
+}
+
+.sp-tapa {
+  transform-origin: center;
+  animation: sp-ancho 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+}
+
+.sp-cajonera {
+  transform-origin: bottom;
+  animation: sp-alto 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.35s both;
+}
+
+.sp-columna {
+  transform-origin: bottom;
+  animation: sp-alto 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both;
+}
+
+.splash-mueble .sp-cajon {
+  fill: #1c1814;
+  transform-origin: left;
+  animation: sp-ancho-izq 0.3s ease-out both;
+}
+
+@keyframes sp-ancho {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes sp-ancho-izq {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes sp-alto {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.splash-marca {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  animation: sp-sube 0.5s ease-out 0.55s both;
+}
+
+.splash-marca em {
+  color: #b88f3a;
+}
+
+@keyframes sp-sube {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.splash-barra {
+  position: relative;
+  width: 8rem;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(247 244 238 / 12%);
+  animation: sp-sube 0.4s ease-out 0.7s both;
+}
+
+.splash-barra::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: inherit;
+  background: #b88f3a;
+  animation: sp-barra 1.1s ease-in-out infinite;
+}
+
+@keyframes sp-barra {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+/* ───────────── Entrada del hero ─────────────
+   Cada pieza con `.intro` entra escalonada (--d = retraso propio) cuando se levanta el splash.
+   Sin JS, entra igual a los 2,4 s; en visitas repetidas, apenas carga. */
+
+.intro {
+  animation: intro-sube 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) calc(2.4s + var(--d, 0ms)) both;
+}
+
+[data-splash="done"] .intro {
+  animation-name: intro-sube-ya;
+  animation-delay: calc(0.15s + var(--d, 0ms));
+}
+
+[data-splash="skip"] .intro {
+  animation-name: intro-sube-ya;
+  animation-delay: var(--d, 0ms);
+}
+
+.intro-foto {
+  animation-name: intro-foto;
+}
+
+[data-splash="done"] .intro-foto,
+[data-splash="skip"] .intro-foto {
+  animation-name: intro-foto-ya;
+}
+
+@keyframes intro-sube {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes intro-sube-ya {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes intro-foto {
+  from {
+    opacity: 0;
+    clip-path: inset(12% 0 0 0 round 1rem);
+    transform: scale(1.04);
+  }
+}
+
+@keyframes intro-foto-ya {
+  from {
+    opacity: 0;
+    clip-path: inset(12% 0 0 0 round 1rem);
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash {
+    display: none;
+  }
+  .intro,
+  [data-splash] .intro {
+    animation: none;
+  }
 }

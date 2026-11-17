@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useInView } from "@/hooks/use-in-view";
+import type { CSSProperties } from "react";
 import { OTRO, useQuote } from "./quote-context";
 
 const cats: { tipo: string; desc: string; icon: LucideIcon }[] = [
@@ -23,8 +23,10 @@ const cats: { tipo: string; desc: string; icon: LucideIcon }[] = [
   { tipo: OTRO, desc: "¿No está? Consultanos", icon: MessageSquarePlus },
 ];
 
+/** Retraso de entrada de cada pieza (ver `.intro` en styles.css). */
+const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
+
 export function Hero() {
-  const { ref, isInView } = useInView();
   const { abrirAsistente } = useQuote();
 
   const pick = (tipo: string) => abrirAsistente(tipo);
@@ -32,25 +34,31 @@ export function Hero() {
   return (
     <section
       id="inicio"
-      ref={ref}
       className="relative overflow-hidden bg-background px-4 pb-16 pt-14 sm:px-6 sm:pt-20 lg:px-8"
     >
       <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.2fr_1fr]">
-        <div className={cn("fade-in", isInView && "fade-in-visible")}>
-          <h1 className="mb-4 text-sm font-medium uppercase tracking-widest text-accent">
+        <div>
+          <h1
+            style={d(0)}
+            className="intro mb-4 text-sm font-medium uppercase tracking-widest text-accent"
+          >
             Muebles y escritorios a medida en La Plata, CABA y AMBA
           </h1>
-          <p className="font-display text-5xl font-medium tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+          <p
+            style={d(80)}
+            className="intro font-display text-5xl font-medium tracking-tight text-foreground sm:text-6xl lg:text-7xl"
+          >
             ¿Qué mueble <em className="text-accent">necesitás?</em>
           </p>
-          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+          <p style={d(160)} className="intro mt-5 max-w-xl text-lg text-muted-foreground">
             Elegí uno, contestá unas preguntas cortas y miralo en 3D. Tu pedido de presupuesto nos
             llega listo por WhatsApp.
           </p>
           <button
             type="button"
             onClick={() => pick("Escritorio")}
-            className="mt-7 flex w-full items-center gap-4 rounded-2xl border-2 border-accent bg-card p-4 text-left shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-5"
+            style={d(240)}
+            className="intro mt-7 flex w-full items-center gap-4 rounded-2xl border-2 border-accent bg-card p-4 text-left shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-5"
           >
             <Monitor className="size-11 flex-none text-accent" strokeWidth={1.4} />
             <span className="min-w-0 flex-1">
@@ -69,13 +77,14 @@ export function Hero() {
             </span>
           </button>
           <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-            {cats.map((c) => (
+            {cats.map((c, i) => (
               <button
                 key={c.tipo}
                 type="button"
                 onClick={() => pick(c.tipo)}
+                style={d(320 + i * 45)}
                 className={cn(
-                  "flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-left transition hover:-translate-y-0.5 hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "intro flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-left transition hover:-translate-y-0.5 hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   c.tipo === OTRO && "col-span-2 border-dashed sm:col-span-3",
                 )}
               >
@@ -87,7 +96,10 @@ export function Hero() {
               </button>
             ))}
           </div>
-          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+          <div
+            style={d(680)}
+            className="intro mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground"
+          >
             {[
               "Diseño, fabricación e instalación",
               "Melamina 18 mm o MDF",
@@ -100,10 +112,7 @@ export function Hero() {
             ))}
           </div>
         </div>
-        <div
-          className={cn("hidden fade-in lg:block", isInView && "fade-in-visible")}
-          style={{ transitionDelay: "150ms" }}
-        >
+        <div style={d(120)} className="intro intro-foto hidden lg:block">
           <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted">
             <img
               src="/images/escritorio-1.jpeg"

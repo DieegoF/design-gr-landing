@@ -12,3 +12,4 @@ export { Quote } from "./quote";
 export { Asistente } from "./asistente";
 export { Avanzado } from "./avanzado";
 export { QuoteProvider } from "./quote-context";
+export { Splash } from "./splash";

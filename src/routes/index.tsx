@@ -9,6 +9,7 @@ import {
   Footer,
   FloatingWhatsApp,
   QuoteProvider,
+  Splash,
 } from "@/components/landing";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/")({
 function LandingPage() {
   return (
     <QuoteProvider>
+      <Splash />
       <div className="min-h-screen bg-background">
         <Navbar />
         <main>
