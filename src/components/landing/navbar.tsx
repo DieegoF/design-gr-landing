@@ -1,4 +1,3 @@
-import { scrollSuave } from "@/lib/smooth";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,7 @@ export function Navbar() {
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            scrollSuave(0);
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
           className="font-display text-xl font-semibold tracking-tight text-foreground"
         >

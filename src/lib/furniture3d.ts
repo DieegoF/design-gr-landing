@@ -447,20 +447,6 @@ export class FurnitureScene {
     return this.front;
   }
 
-  /** Gira la cámara a un ángulo fijo (lo usa la sección de modelos al scrollear). */
-  aim(yaw: number, pitch = 0.14) {
-    this.touched = true;
-    this.front = false;
-    this.yawT = Math.max(-1.25, Math.min(1.25, yaw));
-    this.pitchT = pitch;
-  }
-
-  /** Abre (1) o cierra (0) puertas y cajones sin alternar. */
-  setOpen(v: number) {
-    this.openT = Math.max(0, Math.min(1, v));
-    if (this.openT) this.explodeT = 0;
-  }
-
   snapshot() {
     // la imagen del pedido siempre sale con el mueble armado
     const ex = this.explode;

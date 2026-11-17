@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { startSmooth } from "@/lib/smooth";
 import {
   Navbar,
   Hero,
@@ -24,9 +22,6 @@ export const Route = createFileRoute("/")({
 });
 
 function LandingPage() {
-  useEffect(() => {
-    startSmooth();
-  }, []);
   return (
     <QuoteProvider>
       <div className="min-h-screen bg-background">
