@@ -4,6 +4,7 @@ import {
   Hero,
   Asistente,
   Avanzado,
+  Modos,
   Gallery,
   About,
   Footer,
@@ -29,6 +30,7 @@ function LandingPage() {
         <Navbar />
         <main>
           <Hero />
+          <Modos />
           <Asistente />
           <Avanzado />
           <Gallery />
