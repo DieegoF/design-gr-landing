@@ -399,12 +399,12 @@ export function Quote() {
           <div className="lg:sticky lg:top-24">
             <div className="rounded-2xl border border-border/60 bg-[#e9e2d6] p-3.5">
               <div className="mb-3 flex items-center gap-2.5 border-b border-black/10 pb-2.5">
-                <span className="grid size-9 place-items-center rounded-full bg-primary font-display text-lg text-primary-foreground">
+                <span className="grid size-9 place-items-center rounded-full bg-[#1C1814] font-display text-lg text-[#F7F4EE]">
                   D
                 </span>
                 <span>
-                  <b className="block text-sm text-foreground">Design.gr</b>
-                  <small className="text-xs text-muted-foreground">Así nos llega tu mensaje</small>
+                  <b className="block text-sm text-[#1E1A16]">Design.gr</b>
+                  <small className="text-xs text-[#6b6157]">Así nos llega tu mensaje</small>
                 </span>
               </div>
               {q.img && (

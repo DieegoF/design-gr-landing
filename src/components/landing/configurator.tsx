@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Boxes, DoorOpen, Eye, MessageSquarePlus, Minus, Plus, User } from "lucide-react";
+import {
+  Box,
+  Boxes,
+  DoorOpen,
+  Eye,
+  MessageSquarePlus,
+  Minus,
+  Plus,
+  SlidersHorizontal,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { scrollToSection } from "@/lib/scroll";
@@ -127,15 +137,27 @@ export function Configurator() {
   const MATS: [string, MaterialDef][] = lib ? Object.entries(lib.MATERIALS) : [];
 
   return (
-    <section id="avanzado" className="bg-secondary px-4 py-20 sm:px-6 lg:px-8">
+    <section id="avanzado" className="scroll-mt-16 bg-background px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <p className="text-sm font-medium uppercase tracking-widest text-accent">Modo avanzado</p>
-        <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-          Ajustá tu mueble al detalle
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-2 rounded-full border border-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent">
+            <SlidersHorizontal className="size-3.5" /> Modo 2 · Avanzado
+          </span>
+          <button
+            type="button"
+            onClick={() => scrollToSection("armalo")}
+            className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            ¿Te resulta mucho? Volvé al paso a paso
+          </button>
+        </div>
+        <h2 className="mt-4 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
+          Ajustá tu mueble <em className="italic text-accent">al centímetro</em>
         </h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          Elegí el mueble, las medidas y el material. Arrastrá para girarlo y abrí las puertas para
-          ver el interior.
+          Acá decidís todo vos: medidas exactas, cantidad de cajones y estantes, material y colores.
+          Arrastrá para girarlo, abrí cajones y puertas o miralo pieza por pieza. Abajo completás el
+          pedido.
         </p>
 
         <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-[1.45fr_1fr] lg:items-start">

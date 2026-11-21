@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { scrollToSection } from "@/lib/scroll";
 
 const navLinks = [
-  { label: "Armá tu mueble", id: "armalo" },
+  { label: "Armá tu mueble", id: "modos" },
   { label: "Trabajos", id: "galeria" },
   { label: "Nosotros", id: "nosotros" },
 ];

@@ -14,6 +14,7 @@ import {
   Minus,
   Monitor,
   Plus,
+  ListChecks,
   SlidersHorizontal,
   Store,
   Tv,
@@ -1132,11 +1133,20 @@ export function Asistente() {
       : `${fmt(w.st.W)} de ancho · ${fmt(w.st.H)} de alto`;
 
   return (
-    <section id="armalo" className="bg-secondary px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+    <section id="armalo" className="scroll-mt-16 bg-secondary px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
       <div className="mx-auto max-w-7xl">
-        <p className="text-sm font-medium uppercase tracking-widest text-accent">
-          Presupuesto en 1 minuto
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent-foreground">
+            <ListChecks className="size-3.5" /> Modo 1 · Paso a paso
+          </span>
+          <button
+            type="button"
+            onClick={() => irAvanzado()}
+            className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            ¿Ya tenés las medidas? Pasá al modo avanzado
+          </button>
+        </div>
         <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
           Armá tu mueble y miralo en 3D
         </h2>

@@ -11,5 +11,6 @@ export { Configurator } from "./configurator";
 export { Quote } from "./quote";
 export { Asistente } from "./asistente";
 export { Avanzado } from "./avanzado";
+export { Modos } from "./modos";
 export { QuoteProvider } from "./quote-context";
 export { Splash } from "./splash";
