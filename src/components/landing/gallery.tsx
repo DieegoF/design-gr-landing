@@ -1,75 +1,52 @@
 import { cn } from "@/lib/utils";
 import { useInView } from "@/hooks/use-in-view";
-import { ESCRITORIO_DEF, type FurnitureKind, type FurnitureState } from "@/lib/furniture3d";
-import { useQuote } from "./quote-context";
 
 const images: {
   src: string;
   alt: string;
   title: string;
-  tipo: string;
-  preset?: Partial<FurnitureState> & { k: FurnitureKind };
   featured?: boolean;
 }[] = [
   {
     src: "/images/gallery-escritorio.jpeg",
     alt: "Escritorio a medida en melamina blanca con cajonera de 4 cajones y columna con estantes",
     title: "Escritorio con cajonera y estantes",
-    tipo: "Escritorio",
-    preset: { k: "escritorio", ...ESCRITORIO_DEF },
     featured: true,
   },
   {
     src: "/images/gallery-1.jpeg",
     alt: "Placard a medida con puertas corredizas, trabajo de Design.gr",
     title: "Placard a medida",
-    tipo: "Placard / vestidor",
-    preset: { k: "placard", W: 240, H: 260, D: 60, n: 4, m: "Melamina blanca" },
   },
   {
     src: "/images/gallery-2.jpeg",
     alt: "Interior de vestidor a medida con cajonera",
     title: "Vestidor con cajonera",
-    tipo: "Placard / vestidor",
-    preset: { k: "placard", W: 300, H: 250, D: 60, n: 6, m: "Melamina roble" },
   },
   {
     src: "/images/gallery-3.jpeg",
-    alt: "Biblioteca y estantería a medida en madera",
-    title: "Biblioteca / Estantería",
-    tipo: "Biblioteca / estantería",
-    preset: { k: "biblio", W: 220, H: 230, D: 35, n: 3, m: "Melamina nogal" },
+    alt: "Revestimiento decorativo a medida en listones de madera",
+    title: "Revestimiento en listones",
   },
   {
     src: "/images/gallery-4.jpeg",
-    alt: "Revestimiento decorativo a medida en listones de madera",
-    title: "Revestimiento en listones",
-    tipo: "Mueble TV / living",
-    preset: { k: "rack", W: 240, H: 250, D: 40, n: 3, m: "Melamina roble" },
+    alt: "Biblioteca y estantería a medida en madera",
+    title: "Biblioteca / Estantería",
   },
   {
     src: "/images/gallery-5.jpeg",
     alt: "Diseño integral de mobiliario a medida para local comercial",
     title: "Diseño integral de local",
-    tipo: "Diseño integral",
   },
   {
     src: "/images/gallery-6.jpeg",
     alt: "Mobiliario comercial a medida fabricado por Design.gr",
     title: "Mobiliario comercial",
-    tipo: "Diseño integral",
   },
 ];
 
 export function Gallery() {
   const { ref, isInView } = useInView();
-  const { abrirAsistente } = useQuote();
-
-  // Abre el asistente con el mueble de la foto ya cargado (medidas y color).
-  const pick = (img: (typeof images)[number]) => {
-    const { k: _k, ...preset } = img.preset ?? { k: undefined };
-    abrirAsistente(img.tipo, img.preset ? preset : undefined, img.title);
-  };
 
   return (
     <section id="galeria" className="bg-background px-4 py-20 sm:px-6 lg:px-8">
@@ -79,11 +56,10 @@ export function Gallery() {
             Trabajos realizados
           </p>
           <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-            ¿Te gusta alguno?
+            Muebles que ya hicimos
           </h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            Tocá “Quiero algo así” y lo ves en 3D con tus medidas, o arrancás el presupuesto con ese
-            trabajo como referencia.
+            Fotos reales de trabajos fabricados e instalados por Design.gr.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
@@ -115,16 +91,8 @@ export function Gallery() {
                   </b>
                   <p className="text-[15px] text-muted-foreground">
                     Melamina blanca, cajonera de 4 cajones a la izquierda y columna con estantes a
-                    la derecha. Es el modelo que más nos piden: lo abrís en 3D y le cambiás las
-                    medidas, los cajones y el color.
+                    la derecha. Es el modelo que más nos piden.
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => pick(image)}
-                    className="mt-2 w-full rounded-full bg-primary px-5 py-2.5 text-[14px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 sm:w-fit"
-                  >
-                    Quiero algo así
-                  </button>
                 </div>
               </div>
             ) : (
@@ -148,13 +116,6 @@ export function Gallery() {
                 </div>
                 <div className="flex flex-1 flex-col gap-2.5 p-3 sm:p-4">
                   <b className="text-[14.5px] font-semibold text-foreground">{image.title}</b>
-                  <button
-                    type="button"
-                    onClick={() => pick(image)}
-                    className="mt-auto rounded-full border-[1.5px] border-primary px-3 py-2 text-[13.5px] font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                  >
-                    Quiero algo así
-                  </button>
                 </div>
               </div>
             ),
